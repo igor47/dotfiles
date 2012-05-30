@@ -1,0 +1,6 @@
+shell $SHELL
+vbell on
+startup_message off
+
+hardstatus alwayslastline "%{wb}%?%-Lw%?%{bw}%n*%f %t%?(%u)%?%{wb}%?%+Lw%?%{kb}%=%{Yb}%D %M %d %{w}%c" 
+

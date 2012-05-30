@@ -1,0 +1,6 @@
+OPTIONS=color,hilite_pet,lit_corridor,menucolors,!autopickup,hpmon,!mail
+OPTIONS=showexp,showscore,time
+OPTIONS=fruit:falafel,boulder:0
+
+OPTIONS=role:Wizard,race:Elf,gender:male,pettype:none
+NAME=Igor
