@@ -142,10 +142,17 @@ fi
 
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
-    eval "`dircolors -b`"
-    alias ls='ls --color=auto'
-    #alias dir='ls --color=auto --format=vertical'
-    #alias vdir='ls --color=auto --format=long'
+    # if dircolors exists, assume we're on GNU
+    if [ `which dircolors` ]; then
+        eval "`dircolors -b`"
+        alias ls='ls --color=auto'
+        #alias dir='ls --color=auto --format=vertical'
+        #alias vdir='ls --color=auto --format=long'
+
+    #otherwise, assume we're on osx or bsd or something
+    else
+        alias ls='ls -G'
+    fi
 fi
 
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
