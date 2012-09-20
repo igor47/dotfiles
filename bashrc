@@ -140,6 +140,13 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# Some aliases we wante verywhere
+alias pj='python -mjson.tool'
+alias ll='ls -l'
+#alias la='ls -A'
+#alias l='ls -CF'
+
+
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
     # if dircolors exists, assume we're on GNU
@@ -158,10 +165,7 @@ fi
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
 export LESSOPEN='| /usr/bin/lesspipe %s'
 export LESSCLOSE='/usr/bin/lesspipe %s %s'
-# some more ls aliases
-#alias ll='ls -l'
-#alias la='ls -A'
-#alias l='ls -CF'
+export GREP_OPTIONS='--color=auto'
 
 # custom path vars
 export PATH=~/bin:$PATH
