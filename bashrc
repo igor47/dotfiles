@@ -20,7 +20,16 @@ fi
 #export HISTCONTROL=ignoredups
 # ... and ignore same sucessive entries.
 export HISTCONTROL=ignoreboth
-#use autoresume job control
+
+# we're ignoring:
+# - duplicates
+# - any command starting with a space
+# - simple invocations of ls
+# - fg or bg
+# - exit
+export HISTIGNORE="&:[ \t]*:ls:[bf]g:exit"
+
+#use autoresume job control -- just type a substring of a previous job
 export auto_resume=substring
 
 #save history from multiple shells
@@ -162,6 +171,7 @@ if [ "$TERM" != "dumb" ]; then
     fi
 fi
 
+export EDITOR='vim'
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
 export LESSOPEN='| /usr/bin/lesspipe %s'
 export LESSCLOSE='/usr/bin/lesspipe %s %s'
