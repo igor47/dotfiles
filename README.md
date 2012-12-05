@@ -7,4 +7,4 @@ i recommend using `.bash_profile` for any system-specific settings for that part
 
 ## Very Important ##
 
-https://raw.github.com/rick/roll/master/docs/rickroll.gif
+<img src="https://raw.github.com/igor47/dotfiles/master/rickroll.gif"/>
