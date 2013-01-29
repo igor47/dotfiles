@@ -27,7 +27,7 @@ export HISTCONTROL=ignoreboth
 # - simple invocations of ls
 # - fg or bg
 # - exit
-export HISTIGNORE="&:[ \t]*:ls:[bf]g:exit"
+export HISTIGNORE="&:[ 	]*:ls:[bf]g:exit"
 
 #use autoresume job control -- just type a substring of a previous job
 export auto_resume=substring
