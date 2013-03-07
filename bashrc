@@ -153,12 +153,17 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# Some aliases we wante verywhere
+# Some aliases we want everywhere
 alias pj='python -mjson.tool'
 alias ll='ls -l'
 #alias la='ls -A'
 #alias l='ls -CF'
 
+# git aliases
+alias gs='git status'
+alias gcm='git commit -m'
+alias gpr='git pull --rebase'
+alias gcam='git commit -a -m'
 
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
