@@ -40,7 +40,11 @@ shopt -s histappend
 shopt -s checkwinsize
 
 # make less more friendly for non-text input files, see lesspipe(1)
-[ -x /usr/bin/lesspipe ] && eval "$(lesspipe)"
+if [ -x /usr/bin/lesspipe ]
+then
+   export LESSOPEN='| /usr/bin/lesspipe %s'
+   export LESSCLOSE='/usr/bin/lesspipe %s %s'
+fi
 
 # set variable identifying the chroot you work in (used in the prompt below)
 if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
@@ -173,8 +177,6 @@ fi
 
 export EDITOR='vim'
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
-export LESSOPEN='| /usr/bin/lesspipe %s'
-export LESSCLOSE='/usr/bin/lesspipe %s %s'
 export GREP_OPTIONS='--color=auto'
 
 # custom path vars
