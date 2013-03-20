@@ -161,9 +161,12 @@ alias ll='ls -l'
 
 # git aliases
 alias gs='git status'
+alias gdiff='git diff'
 alias gcm='git commit -m'
-alias gpr='git pull --rebase'
 alias gcam='git commit -a -m'
+alias gpr='git pull --rebase'
+alias gpo='git push origin'
+alias gpom='git push origin master'
 
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
