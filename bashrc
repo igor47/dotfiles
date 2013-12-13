@@ -86,10 +86,11 @@ PS1="${PROMPT_CHROOT}${PROMPT_USER}:${PROMPT_PATH} \$ "
 function parse_git_branch {
    git rev-parse --git-dir &> /dev/null
    git_status="$(git status 2> /dev/null)"
-   branch_pattern="^# On branch ([^${IFS}]*)"
-   detached_branch_pattern="# Not currently on any branch"
-   remote_pattern="# Your branch is (.*) of"
-   diverge_pattern="# Your branch and (.*) have diverged"
+   branch_pattern="On branch ([^${IFS}]*)"
+   detached_branch_pattern="HEAD detached at ([^${IFS}]*)"
+   mid_rebase_pattern="You are currently rebasing branch '([^${IFS}]*)' on"
+   remote_pattern="Your branch is (.*) of"
+   diverge_pattern="Your branch and (.*) have diverged"
    if [[ ${git_status}} =~ "Changed but not updated" ]]; then
       state="${RED}⚡"
    fi
@@ -109,9 +110,11 @@ function parse_git_branch {
    if [[ ${git_status} =~ ${branch_pattern} ]]; then
       branch=${BASH_REMATCH[1]}
    elif [[ ${git_status} =~ ${detached_branch_pattern} ]]; then
-      branch="${YELLOW}NO BRANCH"
+      branch="${YELLOW}${BASH_REMATCH[1]} DETACHED"
+   elif [[ ${git_status} =~ ${mid_rebase_pattern} ]]; then
+      branch="${YELLOW}${BASH_REMATCH[1]} REBASE"
    fi
- 
+
    if [[ ${#state} -gt "0" || ${#remote} -gt "0" ]]; then
       s=" "
    fi
