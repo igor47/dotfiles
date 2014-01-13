@@ -165,11 +165,14 @@ alias ll='ls -l'
 # git aliases
 alias gs='git status'
 alias gdiff='git diff'
+alias gca='git commit -a'
 alias gcm='git commit -m'
 alias gcam='git commit -a -m'
 alias gpr='git pull --rebase'
 alias gpo='git push origin'
 alias gpom='git push origin master'
+alias gri='git rebase --interactive --autosquash'
+alias cclean='cbranch=`git rev-parse --abbrev-ref HEAD`; git checkout production && git pull --rebase && git branch -d $cbranch'
 
 # enable color support of ls and also add handy aliases
 if [ "$TERM" != "dumb" ]; then
