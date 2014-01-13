@@ -20,6 +20,8 @@ fi
 #export HISTCONTROL=ignoredups
 # ... and ignore same sucessive entries.
 export HISTCONTROL=ignoreboth
+export HISTSIZE=1000
+export HISTNAME="default"
 
 # we're ignoring:
 # - duplicates
@@ -32,8 +34,39 @@ export HISTIGNORE="&:[ 	]*:ls:[bf]g:exit"
 #use autoresume job control -- just type a substring of a previous job
 export auto_resume=substring
 
-#save history from multiple shells
+#append to the history file, dont overwrite
 shopt -s histappend
+
+# prepare to save multiple histories depending on an environment variable
+function save_history() {
+   # if we've just exported a new HISTNAME, start using that history file
+   if [ "$HISTNAME" != "$CUR_HISTNAME" ]; then
+      if [ "$HISTNAME" == 'default' ]; then
+         export HISTFILE=~/.bash_history
+      else
+         if [ ! -e ~/.bash_history_files ]; then
+            mkdir ~/.bash_history_files
+         fi
+
+         history -a  # append current lines to the previous history list
+         # set the new history file
+         export HISTFILE=~/.bash_history_files/"$HISTNAME"
+         history -c  # clear the current history
+         history -r  # read the new history file into the current history
+         if [ ! -e "$HISTFILE" ]; then
+            history -w  # write out the history file if it's brand new
+         fi
+      fi
+
+      export CUR_HISTNAME=$HISTNAME
+   fi
+
+   # for non-default histories, keep histories in sync
+   if [ "$CUR_HISTNAME" != 'default' ]; then
+      history -a
+      history -n
+   fi
+}
 
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
@@ -123,6 +156,9 @@ function parse_git_branch {
 }
 
 function prompt_func() {
+   # save the history after every command
+   save_history
+
    # if it's an xterm, set the window title
    case "$TERM" in
       xterm*|rxvt*)
