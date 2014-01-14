@@ -43,26 +43,30 @@ function save_history() {
    if [ "$HISTNAME" != "$CUR_HISTNAME" ]; then
       if [ "$HISTNAME" == 'default' ]; then
          export HISTFILE=~/.bash_history
+         history -c
+         history -r
       else
          if [ ! -e ~/.bash_history_files ]; then
             mkdir ~/.bash_history_files
          fi
 
          history -a  # append current lines to the previous history list
-         # set the new history file
-         export HISTFILE=~/.bash_history_files/"$HISTNAME"
          history -c  # clear the current history
+         export HISTFILE=~/.bash_history_files/"$HISTNAME"
+         [ ! -e "$HISTFILE" ] && touch "$HISTFILE"
          history -r  # read the new history file into the current history
-         if [ ! -e "$HISTFILE" ]; then
-            history -w  # write out the history file if it's brand new
-         fi
       fi
 
-      export CUR_HISTNAME=$HISTNAME
-   fi
+      export CUR_HISTNAME="$HISTNAME"
 
    # for non-default histories, keep histories in sync
-   if [ "$CUR_HISTNAME" != 'default' ]; then
+   elif [ "$CUR_HISTNAME" != 'default' ]; then
+      # put SOMETHING into the history file if there's nothing there
+      # i couldn't find any other way to get this to work. frustrating!
+      if [ $(wc -l "$HISTFILE") -eq 0 ]; then
+         history -w
+      fi
+
       history -a
       history -n
    fi
