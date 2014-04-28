@@ -32,7 +32,7 @@ export HISTNAME="default"
 export HISTIGNORE="&:[ 	]*:ls:[bf]g:exit"
 
 #use autoresume job control -- just type a substring of a previous job
-export auto_resume=substring
+#export auto_resume=substring
 
 #append to the history file, dont overwrite
 shopt -s histappend
@@ -41,6 +41,7 @@ shopt -s histappend
 function save_history() {
    # if we've just exported a new HISTNAME, start using that history file
    if [ "$HISTNAME" != "$CUR_HISTNAME" ]; then
+      echo "Updating history file..."
       if [ "$HISTNAME" == 'default' ]; then
          export HISTFILE=~/.bash_history
          history -c
@@ -55,6 +56,7 @@ function save_history() {
          export HISTFILE=~/.bash_history_files/"$HISTNAME"
          [ ! -e "$HISTFILE" ] && touch "$HISTFILE"
          history -r  # read the new history file into the current history
+         echo "Switched to new history file $HISTFILE"
       fi
 
       export CUR_HISTNAME="$HISTNAME"
@@ -63,7 +65,8 @@ function save_history() {
    elif [ "$CUR_HISTNAME" != 'default' ]; then
       # put SOMETHING into the history file if there's nothing there
       # i couldn't find any other way to get this to work. frustrating!
-      if [ $(wc -l "$HISTFILE") -eq 0 ]; then
+      if [ $(stat -f '%z' "$HISTFILE") -eq 0 ]; then
+         echo "Doing initial save of new history file $HISTFILE"
          history -w
       fi
 
