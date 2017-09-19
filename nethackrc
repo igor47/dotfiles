@@ -1,6 +1,274 @@
-OPTIONS=color,hilite_pet,lit_corridor,menucolors,!autopickup,hpmon,!mail
-OPTIONS=showexp,showscore,time
-OPTIONS=fruit:falafel,boulder:0
+OPTIONS=windowtype:tty
+OPTIONS=color,hilite_pet,lit_corridor,sparkle,hpmon
+OPTIONS=showexp,showscore,time,!mail,!rest_on_space
+OPTIONS=fixinv,safe_pet,sortpack,tombstone
+OPTIONS=pickup_types:$,boulder:0
+OPTIONS=perm_invent
 
 OPTIONS=role:Wizard,race:Elf,gender:male,pettype:none
+OPTIONS=fruit:falafel
 NAME=Igor
+
+##############################################################
+# status colors
+# reference: https://nethackwiki.com/wiki/Options#hilite_status
+# reference: https://nethackwiki.com/wiki/Hilite_status
+
+OPTIONS=statushilites
+
+## HP
+#OPTIONS=hilite_status:hitpoints/66%/yellow/green
+#OPTIONS=hilite_status:hitpoints/50%/orange/yellow
+#OPTIONS=hilite_status:hitpoints/33%/red/orange
+## Pw
+#OPTIONS=hilite_status:power/66%/yellow/green
+#OPTIONS=hilite_status:power/50%/orange/yellow
+#OPTIONS=hilite_status:power/33%/red/orange
+## Carry (1=burdened,2=stressed,3=strained,4=overtaxed,5=overloaded)
+#OPTIONS=hilite_status:carrying-capacity/2/orange/yellow
+#OPTIONS=hilite_status:carrying-capacity/4/red/orange
+## Hunger (2=hungry,3=weak,4=fainting,5=fainted)
+#OPTIONS=hilite_status:hunger/2/yellow/normal
+#OPTIONS=hilite_status:hunger/4/red/orange
+## conditions (1=blind,2=confused,4=poisoned,8=ill,16=halluc,32=stunned,64=slimed)
+#OPTIONS=hilite_status:condition/1/yellow/normal
+#OPTIONS=hilite_status:condition/30/orange/normal
+#OPTIONS=hilite_status:condition/96/red/normal
+## changes
+#OPTIONS=hilite_status:strength/updown/orange/green
+#OPTIONS=hilite_status:dexterity/updown/orange/green
+#OPTIONS=hilite_status:constitution/updown/orange/green
+#OPTIONS=hilite_status:intelligence/updown/orange/green
+#OPTIONS=hilite_status:wisdom/updown/orange/green
+#OPTIONS=hilite_status:charisma/updown/orange/green
+#OPTIONS=hilite_status:dungeon-level/updown/orange/green
+#OPTIONS=hilite_status:experience/updown/orange/green
+#OPTIONS=hilite_status:armor-class/updown/orange/green
+#OPTIONS=hilite_status:power-max/updown/orange/green
+#OPTIONS=hilite_status:hitpoints-max/updown/orange/green
+#
+#
+##############################################################
+# Eidocolors
+
+# I encourage people to use my menucolors! It's why I have a version and date.
+# And a repository! https://github.com/sartak/Eidocolors
+
+# eidocolors 1.14.0, 2013-06-29
+# last minor:
+#   fix forgotten spell (thanks rsarson)
+#   additional menus that shouldn't be colored (thanks rsarson)
+#   improve food colors (Eidolos)
+#   hilight cursed tin of spinach as red
+
+OPTIONS=menucolors
+
+#########
+# B/U/C #
+#########
+#MENUCOLOR="^[a-zA-Z$] - "=white #may want to enable this if regularly playing priest.. (priests don't see the 'uncursed')
+MENUCOLOR=" !C"=white
+MENUCOLOR=" !B"=white
+MENUCOLOR=" !UC"=white
+MENUCOLOR=" uncursed| UC?($| )"=white
+MENUCOLOR=" \([-0-9]+:[-0-9]+\)"=white #nethack doesn't display "uncursed" if charges are known
+MENUCOLOR=" [+-][0-9]"=white
+
+MENUCOLOR=" blessed| B($| )"=cyan
+MENUCOLOR=" cursed| C($| )"=red
+
+################
+# WATER SPORTS #
+################
+MENUCOLOR=" holy water"=cyan&bold
+MENUCOLOR=" blessed clear potion"=cyan&bold
+MENUCOLOR=" blessed potions? called water"=cyan&bold
+MENUCOLOR=" clear potions? named (holy|blessed|B)($| )"=cyan&bold
+MENUCOLOR=" potions? of water named (holy|blessed|B)($| )"=cyan&bold
+MENUCOLOR=" potions? called water named (holy|blessed|B)($| )"=cyan&bold
+MENUCOLOR=" unholy water"=orange
+MENUCOLOR=" cursed clear potion"=orange
+MENUCOLOR=" cursed potions? called water"=orange
+MENUCOLOR=" potions? called water named (unholy|cursed|C)($| )"=orange
+
+#################
+# FOOD CONDUCTS # thanks, teabing!
+#################
+# vegan
+MENUCOLOR="(food |cram |K-|C-)ration|gunyoki"=green&bold
+MENUCOLOR="lembas wafer|melon|carrot|tins? .* spinach"=green&bold
+MENUCOLOR=" oranges?( named.*)?$"=green&bold # avoid coloring orange DSM
+MENUCOLOR=" pears?( named.*)?$"=green&bold # avoid coloring pearl rings
+MENUCOLOR=" (apple|banana|kelp|eucalyptus|garlic|wolfsbane)"=green&bold
+MENUCOLOR=" (slime mold|brain)"=green&bold  ## YOUR FRUIT HERE
+MENUCOLOR="(tins? of )?(gelatinous cube|acid blob|quivering blob)( corpse)?"=green&bold
+MENUCOLOR="(tins? of )?(blue|spotted|ochre) jelly( corpse)?"=green&bold
+MENUCOLOR="(tins? of )?lichen|shrieker|violet fungus|(brown|yellow|green|red) mold( corpse)?"=green&bold
+
+# vegetarian
+MENUCOLOR="egg|pancake|fortune cookie|candy bar|royal jelly|cream pie|candle"=green
+MENUCOLOR="(tin of )?brown pudding|gray ooze( corpse)?"=green
+
+###########
+# GOODIES #
+###########
+MENUCOLOR=" bag .* holding"=magenta
+MENUCOLOR=" luck(stone)?($| )"=magenta
+MENUCOLOR=" wand .* wish(ing)?($| )"=magenta
+MENUCOLOR=" wand .* tele(port(ation)?)?($| )"=magenta
+MENUCOLOR=" wand .* polymorph"=magenta
+MENUCOLOR=" wand .* death"=magenta
+MENUCOLOR=" gain level"=magenta
+MENUCOLOR=" full healing"=magenta
+MENUCOLOR=" magic marker"=magenta
+MENUCOLOR=" magic lamp|lamp .* magic"=magenta
+MENUCOLOR=" unicorn horn[^[]*$"=magenta #this doesn't color the #enhance unicorn
+MENUCOLOR=" tinning kit"=magenta
+MENUCOLOR=" ring .* regen(eration)?($| )"=magenta
+MENUCOLOR=" ring .* conflict"=magenta
+MENUCOLOR=" ring .* (FA|free action)($| )"=magenta
+MENUCOLOR=" ring .* (TC|teleport control)($| )"=magenta
+MENUCOLOR=" ring .* lev(itation)?($| )"=magenta
+MENUCOLOR=" scrolls? .* genocide($| )"=magenta
+MENUCOLOR=" scrolls? .* charging($| )"=magenta
+MENUCOLOR=" scrolls? .* identify($| )"=magenta
+MENUCOLOR=" amulet .* (life ?saving|LS)($| )"=magenta
+MENUCOLOR=" amulet .* ref(lection)?($| )"=magenta
+MENUCOLOR=" c(o|hi)ckatrice (corpse|egg)"=magenta
+MENUCOLOR=" egg .* cockatrice"=magenta
+MENUCOLOR=" stethoscope"=magenta
+
+#instruments
+MENUCOLOR="tooled horn|fire horn|frost horn|horn .* (tooled|fire|frost)"=magenta
+MENUCOLOR=" harp"=magenta
+MENUCOLOR=" bugle"=magenta
+MENUCOLOR=" flute"=magenta
+
+# unidentified magic armor
+MENUCOLOR="piece of cloth|opera cloak|ornamental cope|tattered cape"=magenta
+MENUCOLOR="plumed helmet|etched helmet|crested helmet|visored helmet"=magenta
+MENUCOLOR="(old|padded|riding|fencing) gloves"=magenta
+MENUCOLOR="(mud|buckled|riding|snow|hiking|combat|jungle) boots"=magenta
+
+#############
+# ARTIFACTS #
+#############
+#unaligned
+MENUCOLOR=" (Dragonbane|Fire Brand|Frost Brand|Ogresmasher|Trollsbane|Werebane)"=lightgreen
+
+#lawful normal, quest
+MENUCOLOR=" (Demonbane|Excalibur|Grayswandir|Snickersnee|Sunsword)"=lightgreen
+MENUCOLOR=" (Orb of Detection|Sceptre of Might|Magic Mirror of Merlin|Mitre of Holiness|Tsurugi of Muramasa)"=lightgreen
+
+#neutral normal, quest
+MENUCOLOR=" (Cleaver|Giantslayer|Magicbane|Mjollnir|Vorpal Blade)"=lightgreen
+MENUCOLOR=" (Heart of Ahriman|Staff of Aesculapius|Eyes of the Overworld|Platinum Yendorian Express Card|Orb of Fate|Eye of the Aethiopica)"=lightgreen
+
+#chaotic normal, quest
+MENUCOLOR=" (Grimtooth|Orcrist|Sting|Stormbringer)"=lightgreen
+MENUCOLOR=" (Longbow of Diana|Master Key of Thievery)"=lightgreen
+
+#invocation items
+MENUCOLOR=" (Bell of Opening|silver bell|Candelabrum of Invocation|candelabrum|Book of the Dead|papyrus spellbook)"=magenta&bold
+
+#raison d'etre
+MENUCOLOR=" Amulet of Yendor named"=magenta&bold&underline
+
+##################
+# CURSED GOODIES #
+##################
+MENUCOLOR=" cursed.* bag .* holding"=red&bold
+MENUCOLOR=" cursed.* luck(stone)?($| )"=red&bold
+MENUCOLOR=" cursed.* unicorn horn"=red&bold
+MENUCOLOR=" cursed.* (Bell of Opening|silver bell|Candelabrum of Invocation|candelabrum|Book of the Dead|papyrus spellbook)"=red&bold
+MENUCOLOR="cursed tins? .* spinach|tins? .* spinach .* (cursed|C($| ))"=red
+
+#############
+# BAD STUFF #
+#############
+MENUCOLOR=" load(stone)?($| )"=red&underline
+
+##############################
+# WATCH OUT, BAG OF HOLDING! #
+##############################
+MENUCOLOR=" bag .* tricks"=blue&underline
+MENUCOLOR=" wand .*[^!]canc"=blue&underline
+MENUCOLOR=" wand .* vanish"=blue&underline
+
+################
+# SHINY THINGS #
+################
+MENUCOLOR=" gold piece"=yellow
+MENUCOLOR=" valuable"=brown
+MENUCOLOR=" gems? .* hard"=yellow
+
+#soft gems
+MENUCOLOR=" ([0-9]+|an?|gems? .*) (uncursed |cursed |blessed )?(dilithium|opal|garnet|jasper|agate|jet|obsidian|jade|citrine|chrysoberyl|amber|amethyst|fluorite|turquoise)(e?s)?( stones?| gems?| crystals?)?( named .*)?$"=brown
+
+#hard gems
+MENUCOLOR=" ([0-9]+|an?|gems?.*) (uncursed |cursed |blessed )?(diamond|rub(y|ies)|jacinth|sapphire|black opal|emerald|topaz|aquamarine)(e?s)?( stones?| gems?)?( named .*)?$"=yellow
+
+#######################
+# SPELL FAILURE RATES #
+#######################
+MENUCOLOR=" 0%"=white
+MENUCOLOR=" [1-9]%"=cyan
+MENUCOLOR=" [12][0-9]%"=cyan
+MENUCOLOR=" [3-6][0-9]%"=yellow
+MENUCOLOR=" 7[0-5]%"=yellow
+MENUCOLOR=" 7[6-9]%"=orange
+MENUCOLOR=" 8[0-9]%"=orange
+MENUCOLOR=" 9[0-9]%"=red
+MENUCOLOR=" 100%"=red
+
+###################
+# FORGOTTEN SPELL # thanks, Stevie, rsarson
+###################
+MENUCOLOR="[a-zA-Z ]+ [0-9]\*   [a-z]+ +[0-9]+%"=magenta
+
+############
+# #ENHANCE # thanks itsblah
+############
+MENUCOLOR="^ +[a-z -]+ +\[(Unskilled|Basic|Skilled|Expert|Master|Grand Master)\]$"=none           # normal
+MENUCOLOR="^ *[a-z] - +[a-z -]+ +\[(Unskilled|Basic|Skilled|Expert|Master|Grand Master)\]$"=white # ready to enhance
+MENUCOLOR="^ +\* +[a-z -]+ +\[(Unskilled|Basic|Skilled|Expert|Master|Grand Master)\]$"=white      # enhanceable if more skill slots
+MENUCOLOR="^ +# +[a-z -]+ +\[(Unskilled|Basic|Skilled|Expert|Master|Grand Master)\]$"=none        # enhanceable if more potential
+
+################
+# FORCE COLORS #
+################
+# Some of these are subject to change !
+
+MENUCOLOR="\{R\}"=red
+MENUCOLOR="\{B\}"=blue
+MENUCOLOR="\{C\}"=cyan
+MENUCOLOR="\{G\}"=green
+MENUCOLOR="\{Y\}"=yellow
+MENUCOLOR="\{[MP]\}"=magenta
+MENUCOLOR="\{O\}"=orange
+MENUCOLOR="\{W\}"=white
+MENUCOLOR="\{L\}"=black
+MENUCOLOR="\{y\}"=gray
+MENUCOLOR="\{g\}"=lightgreen
+MENUCOLOR="\{b\}"=lightblue
+MENUCOLOR="\{[mp]\}"=lightmagenta
+MENUCOLOR="\{c\}"=lightcyan
+MENUCOLOR="\{N\}"=none
+MENUCOLOR="\{X\}"=bold
+MENUCOLOR="\{x\}"=dim
+MENUCOLOR="\{U\}"=underline
+MENUCOLOR="\{I\}"=inverse
+MENUCOLOR="\{K\}"=blink
+
+######################
+# FIX ORDINARY MENUS #
+######################
+MENUCOLOR=" is empty. Do what?"=none
+MENUCOLOR="Put something into .*"=none
+MENUCOLOR="Take something out of .*"=none
+
+MENUCOLOR="unicorn horn.*(Unskilled|Basic|Skilled|Expert)"=none
+MENUCOLOR="Info on what a given key does."=none
+MENUCOLOR="Full list of keyboard commands."=none
+MENUCOLOR="altkeyhandler"=none
+MENUCOLOR="fruit.*\["=none
