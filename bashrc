@@ -5,6 +5,11 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+# source global stuff if it's available on the system
+if [ -f /etc/bashrc ]; then
+    . /etc/bashrc
+fi
+
 # always use the 256-color version of xterm if xterm is the termtype
 if [ "x$TERM" = "xxterm" ]
 then
@@ -239,9 +244,5 @@ export GREP_OPTIONS='--color=auto'
 # custom path vars
 export PATH=~/bin:$PATH
 
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-#if [ -f /etc/bash_completion ]; then
-#    . /etc/bash_completion
-#fi
+# gopath
+export GOPATH=~/.go
