@@ -241,8 +241,11 @@ export EDITOR='vim'
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
 export GREP_OPTIONS='--color=auto'
 
-# custom path vars
-export PATH=~/bin:$PATH
-
 # gopath
 export GOPATH=~/.go
+
+# pyenv
+export PYENV_ROOT="$HOME/repos/pyenv"
+
+# custom path vars
+export PATH=$PYENV_ROOT/bin:~/bin:$PATH
