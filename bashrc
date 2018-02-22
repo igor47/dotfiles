@@ -207,8 +207,12 @@ fi
 # Some aliases we want everywhere
 alias pj='python -mjson.tool'
 alias ll='ls -l'
+alias lsd='ls -tr'
 #alias la='ls -A'
 #alias l='ls -CF'
+
+alias ren='qmv --format=do'
+alias grep='grep --color=auto'
 
 # git aliases
 alias gs='git status'
@@ -239,7 +243,6 @@ fi
 
 export EDITOR='vim'
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
-export GREP_OPTIONS='--color=auto'
 
 # gopath
 export GOPATH=~/.go
