@@ -249,6 +249,13 @@ export GOPATH=~/.go
 
 # pyenv
 export PYENV_ROOT="$HOME/repos/pyenv"
+export PATH=$PYENV_ROOT/bin:$PATH
+export PYENV_VIRTUALENV_DISABLE_PROMPT=1
+if command -v pyenv 1>/dev/null 2>&1
+then
+  echo 'pyenv init'
+  eval "$(pyenv init -)"
+fi
 
-# custom path vars
-export PATH=$PYENV_ROOT/bin:~/bin:$PATH
+# my bin always goes first
+export PATH=~/bin:$PATH
