@@ -244,6 +244,9 @@ export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
 export GOPATH=~/.go
 
 # pyenv
+# this is installed like so:
+#  git clone https://github.com/pyenv/pyenv.git ${PYENV_ROOT}
+#  git clone https://github.com/pyenv/pyenv-virtualenv.git ${PYENV_ROOT}/plugins/pyenv-virtualenv
 export PYENV_ROOT="$HOME/repos/pyenv"
 export PATH=$PYENV_ROOT/bin:$PATH
 export PYENV_VIRTUALENV_DISABLE_PROMPT=1
