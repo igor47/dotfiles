@@ -95,16 +95,24 @@ fi
 # via http://nuts-and-bolts-of-cakephp.com/2010/11/27/show-git-branch-in-your-bash-prompt/
 
         RED="\[\033[0;31m\]"
-     YELLOW="\[\033[0;33m\]"
       GREEN="\[\033[0;32m\]"
+     YELLOW="\[\033[0;33m\]"
        BLUE="\[\033[0;34m\]"
-  LIGHT_RED="\[\033[1;31m\]"
-LIGHT_GREEN="\[\033[1;32m\]"
-      WHITE="\[\033[1;37m\]"
- LIGHT_GRAY="\[\033[0;37m\]"
+     PURPLE="\[\033[0;35m\]"
+       CYAN="\[\033[0;36m\]"
+       GRAY="\[\033[0;37m\]"
+
+   BOLD_RED="\[\033[1;31m\]"
+ BOLD_GREEN="\[\033[1;32m\]"
+BOLD_YELLOW="\[\033[1;33m\]"
+  BOLD_BLUE="\[\033[1;34m\]"
+BOLD_PURPLE="\[\033[1;35m\]"
+  BOLD_CYAN="\[\033[1;36m\]"
+  BOLD_GRAY="\[\033[1;37m\]"
+
  COLOR_NONE="\[\e[0m\]"
 
-PROMPT_USER="${LIGHT_GREEN}\u@\h${COLOR_NONE}"
+PROMPT_USER="${BOLD_GREEN}\u@\h${COLOR_NONE}"
 PROMPT_PATH="${BLUE}\w${COLOR_NONE}"
 
 function parse_git_branch {
@@ -171,7 +179,7 @@ function prompt_func() {
    if [ -z ${PYENV_VERSION+x} ]; then
      PROMPT_VIRTUALENV=""
    else
-     PROMPT_VIRTUALENV=" ${GREEN}[${PYENV_VERSION}]${COLOR_NONE}"
+     PROMPT_VIRTUALENV=" ${CYAN}[${PYENV_VERSION}]${COLOR_NONE}"
    fi
 
    # assemble the prompt from pieces
