@@ -91,24 +91,6 @@ then
    export LESSCLOSE='/usr/bin/lesspipe %s %s'
 fi
 
-# set variable identifying the chroot you work in (used in the prompt below)
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
-
-# set a fancy prompt (non-color, unless we know we "want" color)
-#case "$TERM" in
-#xterm-color)
-#    PS1='${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
-#    ;;
-#*)
-#    PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
-#    ;;
-#esac
-
-# Comment in the above and uncomment this below for a color prompt
-#PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \$ "
-
 #i got this stuff from https://gist.github.com/634750
 # via http://nuts-and-bolts-of-cakephp.com/2010/11/27/show-git-branch-in-your-bash-prompt/
 
@@ -122,11 +104,8 @@ LIGHT_GREEN="\[\033[1;32m\]"
  LIGHT_GRAY="\[\033[0;37m\]"
  COLOR_NONE="\[\e[0m\]"
 
-#PS1="${debian_chroot:+($debian_chroot)}\[\033[01;32m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\] \$ "
-PROMPT_CHROOT="${debian_chroot:+($debian_chroot)}"
 PROMPT_USER="${LIGHT_GREEN}\u@\h${COLOR_NONE}"
 PROMPT_PATH="${BLUE}\w${COLOR_NONE}"
-PS1="${PROMPT_CHROOT}${PROMPT_USER}:${PROMPT_PATH} \$ "
 
 function parse_git_branch {
    git rev-parse --git-dir &> /dev/null
@@ -180,17 +159,26 @@ function prompt_func() {
          ;;
    esac
 
+   # discover git info
    git rev-parse --git-dir > /dev/null 2>&1
    if [ $? -eq 0 ]; then
-      prompt="${PROMPT_USER}:${PROMPT_PATH} ${GREEN}{$(parse_git_branch)}${COLOR_NONE}"
-      PS1="${prompt} \$ "
+     PROMPT_GIT=" ${GREEN}{$(parse_git_branch)}${COLOR_NONE}"
    else
-      PS1=$PSAVE
+     PROMPT_GIT=""
    fi
+
+   # discover pyenv info
+   if [ -z ${PYENV_VERSION+x} ]; then
+     PROMPT_VIRTUALENV=""
+   else
+     PROMPT_VIRTUALENV=" ${GREEN}[${PYENV_VERSION}]${COLOR_NONE}"
+   fi
+
+   # assemble the prompt from pieces
+   PS1="${PROMPT_USER}:${PROMPT_PATH}${PROMPT_VIRTUALENV}${PROMPT_GIT} \$ "
 }
 
 # install the prompt function
-export PSAVE=$PS1
 PROMPT_COMMAND=prompt_func
 
 # If this is an xterm set the title to user@host:dir
