@@ -175,11 +175,12 @@ function prompt_func() {
      PROMPT_GIT=""
    fi
 
-   # discover pyenv info
-   if [ -z ${PYENV_VERSION+x} ]; then
-     PROMPT_VIRTUALENV=""
+   # discover virtualenv info
+   if [ ${VIRTUAL_ENV} ]; then
+     envname=$(basename `echo ${VIRTUAL_ENV}`)
+     PROMPT_VIRTUALENV=" ${CYAN}[${envname}]${COLOR_NONE}"
    else
-     PROMPT_VIRTUALENV=" ${CYAN}[${PYENV_VERSION}]${COLOR_NONE}"
+     PROMPT_VIRTUALENV=""
    fi
 
    # assemble the prompt from pieces
@@ -252,10 +253,10 @@ export GOPATH=~/.go
 #  git clone https://github.com/pyenv/pyenv-virtualenv.git ${PYENV_ROOT}/plugins/pyenv-virtualenv
 export PYENV_ROOT="$HOME/repos/pyenv"
 export PATH="${PYENV_ROOT}/bin:${PATH}"
-export PYENV_VIRTUALENV_DISABLE_PROMPT=1
 if command -v pyenv 1>/dev/null 2>&1
 then
   eval "$(pyenv init -)"
+  pyenv virtualenvwrapper
 fi
 
 # rbenv
