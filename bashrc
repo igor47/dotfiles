@@ -243,6 +243,9 @@ export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
 # gopath
 export GOPATH=~/.go
 
+# source .bash_profile for any machine-local settings
+[ -f ${HOME}/.bash_profile ] && source ${HOME}/.bash_profile
+
 # pyenv
 # this is installed like so:
 #  git clone https://github.com/pyenv/pyenv.git ${PYENV_ROOT}
@@ -265,5 +268,5 @@ then
   eval "$(rbenv init -)"
 fi
 
-# my bin always goes first
+# my bin always goes first (so this line always goes last)
 export PATH=~/bin:$PATH
