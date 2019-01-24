@@ -1,0 +1,12 @@
+# This is Git's per-user configuration file.
+[user]
+  name = Igor Serebryany
+
+[push]
+  default = current
+
+[core]
+  excludesfile = /Users/igor.serebryany/.gitignore_global
+
+[include]
+  path = ~/.gitconfig.local
