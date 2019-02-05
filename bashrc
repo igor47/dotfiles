@@ -251,22 +251,28 @@ export GOPATH=~/.go
 # this is installed like so:
 #  git clone https://github.com/pyenv/pyenv.git ${PYENV_ROOT}
 #  git clone https://github.com/pyenv/pyenv-virtualenv.git ${PYENV_ROOT}/plugins/pyenv-virtualenv
-export PYENV_ROOT="$HOME/repos/pyenv"
-export PATH="${PYENV_ROOT}/bin:${PATH}"
-if command -v pyenv 1>/dev/null 2>&1
+if [ -d "$HOME/repos/pyenv" ]
 then
-  eval "$(pyenv init -)"
-  pyenv virtualenvwrapper
+  export PYENV_ROOT="$HOME/repos/pyenv"
+  export PATH="${PYENV_ROOT}/bin:${PATH}"
+  if command -v pyenv 1>/dev/null 2>&1
+  then
+    eval "$(pyenv init -)"
+    pyenv virtualenvwrapper
+  fi
 fi
 
 # rbenv
 # this is installed like so:
 #   git clone https://github.com/rbenv/rbenv.git ${RBENV_ROOT}
-export RBENV_ROOT="$HOME/repos/rbenv"
-export PATH="${RBENV_ROOT}/bin:${PATH}"
-if command -v rbenv 1>/dev/null 2>&1
+if [ -d "$HOME/repos/rbenv" ]
 then
-  eval "$(rbenv init -)"
+  export RBENV_ROOT="$HOME/repos/rbenv"
+  export PATH="${RBENV_ROOT}/bin:${PATH}"
+  if command -v rbenv 1>/dev/null 2>&1
+  then
+    eval "$(rbenv init -)"
+  fi
 fi
 
 # my bin always goes first (so this line always goes last)
