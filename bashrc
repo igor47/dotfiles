@@ -255,11 +255,14 @@ if [ -d "$HOME/repos/pyenv" ]
 then
   export PYENV_ROOT="$HOME/repos/pyenv"
   export PATH="${PYENV_ROOT}/bin:${PATH}"
-  if command -v pyenv 1>/dev/null 2>&1
-  then
-    eval "$(pyenv init -)"
-    pyenv virtualenvwrapper
-  fi
+fi
+
+# actually initialize pyenv
+PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
+if command -v pyenv 1>/dev/null 2>&1
+then
+  eval "$(pyenv init -)"
+  pyenv virtualenvwrapper
 fi
 
 # rbenv
