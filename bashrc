@@ -5,6 +5,10 @@
 # If not running interactively, don't do anything
 [ -z "$PS1" ] && return
 
+# avoid infinite import loop
+[ -n "$BASHRC_SOURCED" ] && return
+export BASHRC_SOURCED=true
+
 # source global stuff if it's available on the system
 if [ -f /etc/bashrc ]; then
     . /etc/bashrc
