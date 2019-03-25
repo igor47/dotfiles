@@ -278,5 +278,13 @@ then
   fi
 fi
 
+# nvm configuration
+if [ -d "$HOME/repos/nvm" ]
+then
+  export NVM_DIR="$HOME/repos/nvm"
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+fi
+
 # my bin always goes first (so this line always goes last)
 export PATH=~/bin:$PATH
