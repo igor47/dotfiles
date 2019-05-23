@@ -84,6 +84,10 @@ function save_history() {
    fi
 }
 
+function histname() {
+  export HISTNAME="${1}"
+}
+
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
