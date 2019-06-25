@@ -285,11 +285,9 @@ then
 fi
 
 # nvm configuration
-if [ -d "$HOME/repos/nvm" ]
+if command -v nodenv 1>/dev/null 2>&1
 then
-  export NVM_DIR="$HOME/repos/nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-  [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+  eval "$(nodenv init -)"
 fi
 
 # source .bash_profile for any machine-local settings
