@@ -295,3 +295,6 @@ fi
 
 # my bin always goes first (so this line always goes last)
 export PATH=~/bin:$PATH
+
+# allow resourcing bashrc
+unset BASHRC_SOURCED
