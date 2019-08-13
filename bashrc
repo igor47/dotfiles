@@ -256,7 +256,7 @@ export GOPATH=~/.go
 # pyenv
 # this is installed like so:
 #  git clone https://github.com/pyenv/pyenv.git ${PYENV_ROOT}
-#  git clone https://github.com/pyenv/pyenv-virtualenv.git ${PYENV_ROOT}/plugins/pyenv-virtualenv
+#  git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git $(pyenv root)/plugins/pyenv-virtualenvwrapper
 if [ -d "$HOME/repos/pyenv" ]
 then
   export PYENV_ROOT="$HOME/repos/pyenv"
