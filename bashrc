@@ -284,6 +284,14 @@ then
   fi
 fi
 
+# nodenv
+# this is installed like so:
+#   git clone https://github.com/nodenv/nodenv.git ~/repos/nodenv
+if [ -d "$HOME/repos/nodenv" ]
+then
+  export PATH="${HOME}/repos/nodenv/bin:${PATH}"
+fi
+
 # nvm configuration
 if command -v nodenv 1>/dev/null 2>&1
 then
