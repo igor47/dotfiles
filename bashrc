@@ -248,7 +248,7 @@ if [ "$TERM" != "dumb" ]; then
 fi
 
 export EDITOR='vim'
-export LESS='--RAW-CONTROL-CHARS --tabs=8 -r'
+export LESS='--RAW-CONTROL-CHARS --tabs=8 -R'
 
 # gopath
 export GOPATH=~/.go
