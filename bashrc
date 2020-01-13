@@ -292,7 +292,7 @@ then
   export PATH="${HOME}/repos/nodenv/bin:${PATH}"
 fi
 
-# nvm configuration
+# actually load nodenv if the binary is available
 if command -v nodenv 1>/dev/null 2>&1
 then
   eval "$(nodenv init -)"
