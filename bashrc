@@ -209,6 +209,15 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
+# rtssh command
+# see: https://pempek.net/articles/2013/04/24/vpn-less-persistent-ssh-sessions/
+function rtssh {
+  case "$2" in
+    "") autossh -M 0 $1 -t "if tmux -qu has; then tmux -qu attach; else EDITOR=vim tmux -qu new; fi";;
+    *) autossh -M 0 $1 -t "if tmux -qu has -t $2; then tmux -qu attach -t $2; else EDITOR=vim tmux -qu new -s $2; fi";;
+  esac
+}
+
 # Some aliases we want everywhere
 alias pj='python -mjson.tool'
 alias ll='ls -l'
