@@ -283,6 +283,9 @@ fi
 # rbenv
 # this is installed like so:
 #   git clone https://github.com/rbenv/rbenv.git ${RBENV_ROOT}
+# then also install ruby build to be able to install ruby versions:
+#  mkdir -p "$(rbenv root)"/plugins
+#  git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
 if [ -d "$HOME/repos/rbenv" ]
 then
   export RBENV_ROOT="$HOME/repos/rbenv"
@@ -305,6 +308,16 @@ fi
 if command -v nodenv 1>/dev/null 2>&1
 then
   eval "$(nodenv init -)"
+fi
+
+# asdf
+# this is installed like so:
+#   git clone https://github.com/asdf-vm/asdf.git ~/repos/asdf
+#   cd ~/repos/asdf && git checkout v0.7.8 && cd -
+if [ -d "$HOME/repos/asdf" ]
+then
+  . ${HOME}/repos/asdf/asdf.sh
+  . ${HOME}/repos/asdf/completions/asdf.bash
 fi
 
 # source .bash_profile for any machine-local settings
