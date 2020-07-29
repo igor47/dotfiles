@@ -262,54 +262,6 @@ export LESS='--RAW-CONTROL-CHARS --tabs=8 -R'
 # gopath
 export GOPATH=~/.go
 
-# pyenv
-# this is installed like so:
-#  git clone https://github.com/pyenv/pyenv.git ${PYENV_ROOT}
-#  git clone https://github.com/pyenv/pyenv-virtualenvwrapper.git $(pyenv root)/plugins/pyenv-virtualenvwrapper
-if [ -d "$HOME/repos/pyenv" ]
-then
-  export PYENV_ROOT="$HOME/repos/pyenv"
-  export PATH="${PYENV_ROOT}/bin:${PATH}"
-fi
-
-# actually initialize pyenv
-PYENV_VIRTUALENVWRAPPER_PREFER_PYVENV="true"
-if command -v pyenv 1>/dev/null 2>&1
-then
-  eval "$(pyenv init -)"
-  pyenv virtualenvwrapper
-fi
-
-# rbenv
-# this is installed like so:
-#   git clone https://github.com/rbenv/rbenv.git ${RBENV_ROOT}
-# then also install ruby build to be able to install ruby versions:
-#  mkdir -p "$(rbenv root)"/plugins
-#  git clone https://github.com/rbenv/ruby-build.git "$(rbenv root)"/plugins/ruby-build
-if [ -d "$HOME/repos/rbenv" ]
-then
-  export RBENV_ROOT="$HOME/repos/rbenv"
-  export PATH="${RBENV_ROOT}/bin:${PATH}"
-  if command -v rbenv 1>/dev/null 2>&1
-  then
-    eval "$(rbenv init -)"
-  fi
-fi
-
-# nodenv
-# this is installed like so:
-#   git clone https://github.com/nodenv/nodenv.git ~/repos/nodenv
-if [ -d "$HOME/repos/nodenv" ]
-then
-  export PATH="${HOME}/repos/nodenv/bin:${PATH}"
-fi
-
-# actually load nodenv if the binary is available
-if command -v nodenv 1>/dev/null 2>&1
-then
-  eval "$(nodenv init -)"
-fi
-
 # asdf
 # this is installed like so:
 #   git clone https://github.com/asdf-vm/asdf.git ~/repos/asdf
