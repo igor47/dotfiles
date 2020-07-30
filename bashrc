@@ -266,9 +266,21 @@ export GOPATH=~/.go
 # this is installed like so:
 #   git clone https://github.com/asdf-vm/asdf.git ~/repos/asdf
 #   cd ~/repos/asdf && git checkout v0.7.8 && cd -
+# we require direnv:
+#   asdf plugin add direnv
+#   asdf install direnv 2.20.0
+#   asdf global direnv 2.20.0
 if [ -d "$HOME/repos/asdf" ]
 then
-  . ${HOME}/repos/asdf/asdf.sh
+  #. ${HOME}/repos/asdf/asdf.sh
+  # In order to bypass asdf shims. We *only* add the `ASDF_DIR/bin`
+  # directory to PATH, since we still want to use `asdf` but not its shims.
+  export PATH="$HOME/repos/asdf/bin:$PATH"
+
+  # Hook direnv into your shell.
+  eval "$(asdf exec direnv hook bash)"
+
+  # add asdf bash completions
   . ${HOME}/repos/asdf/completions/asdf.bash
 fi
 
