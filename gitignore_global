@@ -39,3 +39,7 @@ Thumbs.db
 # Vim swap files #
 ##################
 .*sw?
+
+# direnv files. ours often just contains `use asdf`
+##################
+.envrc
