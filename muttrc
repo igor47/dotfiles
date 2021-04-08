@@ -38,6 +38,13 @@ set pgp_verify_sig=yes
 set alias_file="~/.aliases"
 source $alias_file
 
+# use notmuch to search for email
+set query_command = "notmuch-addrlookup %s"
+
+# show full-width results from notmuch-addrlookup
+# from: https://github.com/neomutt/neomutt/issues/629#issuecomment-307477166
+set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
+
 set charset="utf-8"
 set pager_stop=yes
 set tilde=yes
