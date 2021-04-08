@@ -55,6 +55,10 @@ set menu_context=1
 unset markers
 set smart_wrap
 
+# better handling of html emails
+# see: https://github.com/neomutt/neomutt/issues/430
+auto_view text/html
+
 set autoedit=yes
 set edit_headers=yes
 set editor="/usr/bin/vim -c 'set textwidth=72' -c 'setlocal spell spelllang=en_us'"
