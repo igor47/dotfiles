@@ -11,6 +11,7 @@ alternates '^igor(47)?@(uchicago.edu|monksofcool.org|moomers.org|gmail.com)$'
 
 #my incoming mail
 #mailboxes /var/mail/igor47
+unmailboxes *
 mailboxes ~/Maildir
 
 #my saved mail
@@ -23,7 +24,6 @@ set mask="!^\\.[^.]"	#mask out . files
 
 set postponed=+drafts
 set record=+sent-mail
-set nosave_name
 set hdr_format="%Z %3C %{%b %d} %-19.19L (%5c) %s"
 set confirmappend=no
 save-hook . =archive
@@ -45,6 +45,10 @@ set query_command = "notmuch-addrlookup %s"
 # from: https://github.com/neomutt/neomutt/issues/629#issuecomment-307477166
 set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
 
+# save more history
+set save_history=25
+set history_file=~/.mutt/history
+
 set charset="utf-8"
 set pager_stop=yes
 set tilde=yes
@@ -52,6 +56,7 @@ set pager_index_lines=4
 set pager_context=1
 set menu_context=1
 
+# remove `+` markers when lines are wrapped, and wrap at word boundaries
 unset markers
 set smart_wrap
 
@@ -74,6 +79,7 @@ bind generic - previous-page
 bind generic \; tag-entry
 
 macro attach W "<save-entry><bol>~/www/htdocs/random/<eol>" "Save to web folder"
+macro attach S "<save-entry><bol>~/Sync/<eol>" "Save to syncthing"
 
 #mailing lists
 subscribe libvir-list@redhat.com
