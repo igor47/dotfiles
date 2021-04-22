@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -u
+
+if [[ ! -f ${AWS_SESSION_FILE} ]]; then
+  echo "No session found; did you run `aws_get_session <mfa token>` ?"
+fi
+
+export AWS_ACCESS_KEY_ID=`cat ${AWS_SESSION_FILE} | jq --raw-output .Credentials.AccessKeyId`
+export AWS_SECRET_ACCESS_KEY=`cat ${AWS_SESSION_FILE} | jq --raw-output .Credentials.SecretAccessKey`
+export AWS_SESSION_TOKEN=`cat ${AWS_SESSION_FILE} | jq --raw-output .Credentials.SessionToken`
+direnv dump
