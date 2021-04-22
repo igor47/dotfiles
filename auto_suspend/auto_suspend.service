@@ -1,0 +1,6 @@
+[Unit]
+Description=Checks battery and suspends if low
+
+[Service]
+Type=oneshot
+ExecStart=/home/igor47/bin/auto_suspend.sh
