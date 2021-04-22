@@ -3,4 +3,4 @@ Description=Updates notmuch index
 
 [Service]
 Type=oneshot
-ExecStart=/home/igor47/bin/notmuch.sh
+ExecStart=/home/igor47/bin/notmuch-new.sh
