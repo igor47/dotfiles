@@ -15,3 +15,7 @@ reminder for how to make my laptop charge to 100% (which it doesn't usually do).
 
 determines when to suspend my laptop depending on state of charge.
 see the [relevant blog post](https://igor.moomers.org/arch-linux-config)
+
+## notmuch
+
+regularly re-run the notmuch index, including tagging spam messages
