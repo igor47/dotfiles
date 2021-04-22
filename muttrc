@@ -29,6 +29,9 @@ set confirmappend=no
 save-hook . =archive
 set header_cache=~/.mutt/headercache
 
+# strict threads -- don't group messages with the same subject line
+set strict_threads
+
 source ~/.gnupg/gpg.rc
 set pgp_autosign=yes
 set pgp_timeout=300
