@@ -282,6 +282,9 @@ then
 
   # add asdf bash completions
   . ${HOME}/repos/asdf/completions/asdf.bash
+
+  # A shortcut for asdf managed direnv.
+  direnv() { asdf exec direnv "$@"; }
 fi
 
 # source .bash_profile for any machine-local settings
