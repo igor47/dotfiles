@@ -1,0 +1,9 @@
+Host *
+  ControlMaster auto
+  ControlPath ~/.ssh/control/%r@%h-%p
+  ControlPersist 5m
+  ServerAliveInterval 5
+  ServerAliveCountMax 3
+
+Host moomers
+	HostName moomers.org

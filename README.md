@@ -14,6 +14,17 @@ mkdir -p ~/.config/alacritty
 ln -s ~/repos/dotfiles/alacritty.yml ~/.config/alacritty/
 ```
 
+## ssh config
+
+this should probably just be the base config.
+use like so:
+
+```
+cat ~/repos/dotfiles/ssh_config > ~/.ssh/config
+```
+
+and then add specific hosts beyond moomers there.
+
 ## Very Important ##
 
 <img src="https://raw.github.com/igor47/dotfiles/master/rickroll.gif"/>
