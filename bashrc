@@ -229,6 +229,12 @@ alias ren='qmv --format=do'
 alias grep='grep --color=auto'
 
 # git aliases
+# Determine if the main Git branch is "master" or "main". (Assumes it's one of those two.)
+# https://stackoverflow.com/a/66622363/6962
+function git_main_branch {
+    [ -f "$(git rev-parse --show-toplevel)/.git/refs/heads/master" ] && echo "master" || echo "main"
+}
+
 alias gs='git status'
 alias gdiff='git diff'
 alias gca='git commit -a'
@@ -236,9 +242,9 @@ alias gcm='git commit -m'
 alias gcam='git commit -a -m'
 alias gpr='git pull --rebase'
 alias gpo='git push origin'
-alias gpom='git push origin master'
+alias gpom='git push origin `git_main_branch`'
 alias gri='git rebase --interactive --autosquash'
-alias grom='git checkout master && gpr && git checkout - && git rebase master'
+alias grom='git checkout `git_main_branch` && gpr && git checkout - && git rebase `git_main_branch`'
 alias cclean='cbranch=`git rev-parse --abbrev-ref HEAD`; git checkout production && git pull --rebase && git branch -d $cbranch'
 
 # enable color support of ls and also add handy aliases
