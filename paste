@@ -1,0 +1,13 @@
+#!/bin/sh
+
+# copy/paste commands across platforms
+if command -v pbpaste &>/dev/null
+then
+    pbpaste $@
+elif command -v wl-paste &>/dev/null
+then
+    wl-paste $@
+else
+    echo && exit 1
+fi
+
