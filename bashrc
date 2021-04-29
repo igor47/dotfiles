@@ -218,6 +218,20 @@ function rtssh {
   esac
 }
 
+# copy/paste commands across platforms
+if command -v pbcopy &>/dev/null
+then
+    alias copy=pbcopy
+    alias paste=pbpaste
+elif command -v wl-copy &>/dev/null
+then
+    alias copy=wl-copy
+    alias paste="wl-paste -n"
+else
+    alias copy="echo 'not copied!' && exit 1"
+    alias paste=echo
+fi
+
 # Some aliases we want everywhere
 alias pj='python -mjson.tool'
 alias ll='ls -l'
