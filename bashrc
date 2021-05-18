@@ -293,6 +293,14 @@ then
   . ${HOME}/repos/asdf/completions/asdf.bash
 fi
 
+# fzf -- where does it come from?
+# arch:
+if [ -d "/usr/share/fzf" ]
+then
+    source /usr/share/fzf/key-bindings.bash
+    source /usr/share/fzf/completion.bash
+fi
+
 # source .bash_profile for any machine-local settings
 [ -f ${HOME}/.bash_profile ] && source ${HOME}/.bash_profile
 
