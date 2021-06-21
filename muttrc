@@ -80,6 +80,7 @@ hdr_order Date: From: To: Cc: Subject:
 bind generic ' ' next-page
 bind generic - previous-page
 bind generic \; tag-entry
+bind generic a tag-prefix
 
 macro attach W "<save-entry><bol>~/www/htdocs/random/<eol>" "Save to web folder"
 macro attach S "<save-entry><bol>~/Sync/<eol>" "Save to syncthing"
