@@ -262,6 +262,10 @@ if [ "$TERM" != "dumb" ]; then
     fi
 fi
 
+# show last 5 downloads quickly
+alias l5d='ls -t ~/Downloads | head -n 5'
+alias l5s='ls -t ~/Sync | head -n 5'
+
 export EDITOR='vim'
 export LESS='--RAW-CONTROL-CHARS --tabs=8 -R'
 
