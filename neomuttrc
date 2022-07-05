@@ -32,11 +32,10 @@ set header_cache=~/.neomutt/headercache
 # strict threads -- don't group messages with the same subject line
 set strict_threads
 
-source ~/.gnupg/gpg.rc
-set pgp_autosign=yes
-set pgp_timeout=300
-set pgp_replyencrypt=yes
-set pgp_verify_sig=yes
+set pgp_self_encrypt = yes
+set crypt_verify_sig = yes
+set crypt_autosign = yes
+set crypt_opportunistic_encrypt = yes
 
 set alias_file="~/.aliases"
 source $alias_file
