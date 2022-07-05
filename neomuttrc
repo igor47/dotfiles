@@ -1,0 +1,161 @@
+#
+# This file is revised version of Pine.rc (v 1.5 2000/02/11 09:04:22 roessler).
+# Now nearly all keys of PINE 4.33 are supported. However, some of them are
+# not implementable with mutt, e.g. zooming.
+# 
+#            -- Tobias von Koch <tvk@von-koch.com>
+#
+
+set from=igor47@moomers.org
+alternates '^igor(47)?@(uchicago.edu|monksofcool.org|moomers.org|gmail.com)$'
+
+#my incoming mail
+#mailboxes /var/mail/igor47
+unmailboxes *
+mailboxes ~/Maildir
+
+#my saved mail
+set mbox_type=Maildir
+
+set folder="~/Maildir"
+set mbox=~/Maildir		#where stuff gets moved to
+set move=no				#but don't move by default
+set mask="!^\\.[^.]"	#mask out . files
+
+set postponed=+drafts
+set record=+sent-mail
+set hdr_format="%Z %3C %{%b %d} %-19.19L (%5c) %s"
+set confirmappend=no
+save-hook . =archive
+set header_cache=~/.neomutt/headercache
+
+# strict threads -- don't group messages with the same subject line
+set strict_threads
+
+source ~/.gnupg/gpg.rc
+set pgp_autosign=yes
+set pgp_timeout=300
+set pgp_replyencrypt=yes
+set pgp_verify_sig=yes
+
+set alias_file="~/.aliases"
+source $alias_file
+
+# use notmuch to search for email
+set query_command = "notmuch-addrlookup %s"
+
+# show full-width results from notmuch-addrlookup
+# from: https://github.com/neomutt/neomutt/issues/629#issuecomment-307477166
+set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
+
+# save more history
+set save_history=25
+set history_file=~/.mutt/history
+
+set charset="utf-8"
+set pager_stop=yes
+set tilde=yes
+set pager_index_lines=4
+set pager_context=1
+set menu_context=1
+
+# remove `+` markers when lines are wrapped, and wrap at word boundaries
+unset markers
+set smart_wrap
+
+# better handling of html emails
+# see: https://github.com/neomutt/neomutt/issues/430
+auto_view text/html
+
+set autoedit=yes
+set edit_headers=yes
+set editor="/usr/bin/vim -c 'set textwidth=72' -c 'setlocal spell spelllang=en_us'"
+
+ignore *
+unignore from date subject to cc
+unignore organization x-mailer x-mailing-list x-spam-status
+my_hdr X-Butfro-Howlong: unknown
+hdr_order Date: From: To: Cc: Subject:
+
+bind generic ' ' next-page
+bind generic - previous-page
+bind generic \; tag-entry
+bind generic a tag-prefix
+
+macro attach W "<save-entry><bol>~/www/htdocs/random/<eol>" "Save to web folder"
+macro attach S "<save-entry><bol>~/Sync/<eol>" "Save to syncthing"
+
+#mailing lists
+subscribe libvir-list@redhat.com
+subscribe libvirt-users@redhat.com
+subscribe libguestfs@redhat.com
+subscribe xen-users@lists.xensource.com
+subscribe monumentsf@googlegroups.com
+subscribe readings@moomers.org
+subscribe techtalk@lists.uchicago.edu
+subscribe sanfrancisco-announce@burningman.com
+subscribe crypto-ops@eff.org
+
+#####INDEX#####
+# Not implemented are:  J Tab Z A # M O
+#####
+bind index a tag-prefix
+bind index c mail
+bind index e save-message
+bind index g change-folder
+bind index n next-undeleted
+bind index p previous-undeleted
+bind index r reply
+bind index R group-reply
+bind index s save-message
+bind index t create-alias
+bind index v display-message
+bind index x sync-mailbox
+bind index $ sort-mailbox
+bind index * flag-message
+macro index < g?
+bind index > display-message
+
+#####PAGER#####
+# Not implemented: Ret ^F ^B J # M O
+#####
+bind pager c mail
+bind pager e save-message
+bind pager g change-folder
+macro pager l g?
+bind pager n next-undeleted
+bind pager p previous-undeleted
+bind pager r reply
+bind pager R group-reply
+bind pager s save-message
+bind pager t create-alias
+bind pager w search
+bind pager <up> previous-line
+bind pager <down> next-line
+bind pager < exit
+bind pager > view-attachments
+bind pager * flag-message
+bind pager % print-message
+bind pager : tag-message
+
+# Colors
+#### These are not the default colors of PINE, they're just what I prefer.
+
+color normal default default
+color hdrdefault red default
+color quoted brightblue default
+color signature red default
+color indicator brightyellow red
+color error brightred default
+color status yellow blue
+color tree magenta default      # the thread tree in the index menu
+color tilde magenta default
+color message brightcyan default
+color markers brightcyan default
+color attachment brightmagenta default
+color search default green      # how to hilite search patterns in the pager
+
+color header yellow default ^(From|Subject):
+color body brightwhite default "(ftp|http)://[^ ]+" # point out URLs
+color body brightwhite default [-a-z_0-9.]+@[-a-z_0-9.]+    # e-mail addresses
+color underline brightgreen default
