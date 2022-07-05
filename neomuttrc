@@ -95,6 +95,14 @@ subscribe techtalk@lists.uchicago.edu
 subscribe sanfrancisco-announce@burningman.com
 subscribe crypto-ops@eff.org
 
+# notmuch
+set nm_default_uri = notmuch:///home/igor47/Maildir
+#set nm_query_type = "threads"  # default: messages
+set virtual_spoolfile = no
+virtual-mailboxes "NMInbox" "notmuch://?query=tag:inbox"
+virtual-mailboxes "NMArchive" "notmuch://?query=tag:archive"
+macro index \Cf "<vfolder-from-query>"
+
 #####INDEX#####
 # Not implemented are:  J Tab Z A # M O
 #####
