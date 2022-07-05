@@ -102,18 +102,13 @@ bind index a tag-prefix
 bind index c mail
 bind index e save-message
 bind index g change-folder
-bind index n next-undeleted
-bind index p previous-undeleted
 bind index r reply
 bind index R group-reply
 bind index s save-message
 bind index t create-alias
-bind index v display-message
 bind index x sync-mailbox
 bind index $ sort-mailbox
 bind index * flag-message
-macro index < g?
-bind index > display-message
 
 #####PAGER#####
 # Not implemented: Ret ^F ^B J # M O
@@ -121,7 +116,6 @@ bind index > display-message
 bind pager c mail
 bind pager e save-message
 bind pager g change-folder
-macro pager l g?
 bind pager n next-undeleted
 bind pager p previous-undeleted
 bind pager r reply
