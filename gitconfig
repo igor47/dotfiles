@@ -1,6 +1,7 @@
 # This is Git's per-user configuration file.
 [user]
   name = Igor Serebryany
+  signingkey = D0A37C06E95A2D72C2965B96139A885FFDB309E3
 
 [push]
   default = current
@@ -10,3 +11,12 @@
 
 [include]
   path = ~/.gitconfig.local
+
+[filter "lfs"]
+  clean = git-lfs clean -- %f
+  smudge = git-lfs smudge -- %f
+  process = git-lfs filter-process
+  required = true
+
+[commit]
+  gpgsign = true
