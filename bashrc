@@ -295,6 +295,9 @@ then
 
   # add asdf bash completions
   . ${HOME}/repos/asdf/completions/asdf.bash
+
+  # add asdf source (created by `asdf direnv setup`)
+  source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
 fi
 
 # fzf -- where does it come from?
@@ -309,7 +312,7 @@ fi
 [ -f ${HOME}/.bash_profile ] && source ${HOME}/.bash_profile
 
 # my bin always goes first (so this line always goes last)
-export PATH=~/bin:$PATH
+export PATH=${HOME}/bin:$PATH
 
 # allow resourcing bashrc
 unset BASHRC_SOURCED
