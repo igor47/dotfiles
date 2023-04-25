@@ -227,6 +227,7 @@ alias lsd='ls -tr'
 
 alias ren='qmv --format=do'
 alias grep='grep --color=auto'
+alias totp='oathtool -b -w 2 --totp -'
 
 # git aliases
 # Determine if the main Git branch is "master" or "main". (Assumes it's one of those two.)
