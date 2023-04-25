@@ -32,6 +32,7 @@ set header_cache=~/.neomutt/headercache
 # strict threads -- don't group messages with the same subject line
 set strict_threads
 
+set pgp_default_key=0xFDB309E3
 set pgp_self_encrypt = yes
 set crypt_verify_sig = yes
 set crypt_autosign = yes
