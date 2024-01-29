@@ -246,6 +246,7 @@ alias gpo='git push origin'
 alias gpom='git push origin `git_main_branch`'
 alias gri='git rebase --interactive --autosquash'
 alias grom='git checkout `git_main_branch` && gpr && git checkout - && git rebase `git_main_branch`'
+alias gb="git checkout \$(git for-each-ref --sort=-committerdate --format='%(refname:short)' refs/heads/ | fzf)"
 alias cclean='cbranch=`git rev-parse --abbrev-ref HEAD`; git checkout production && git pull --rebase && git branch -d $cbranch'
 
 # enable color support of ls and also add handy aliases
