@@ -46,48 +46,6 @@ export HISTIGNORE="&:[ 	]*:ls:[bf]g:exit"
 #append to the history file, dont overwrite
 shopt -s histappend
 
-# prepare to save multiple histories depending on an environment variable
-function save_history() {
-   # if we've just exported a new HISTNAME, start using that history file
-   if [ "$HISTNAME" != "$CUR_HISTNAME" ]; then
-      echo "Updating history file..."
-      if [ "$HISTNAME" == 'default' ]; then
-         export HISTFILE=~/.bash_history
-         history -c
-         history -r
-      else
-         if [ ! -e ~/.bash_history_files ]; then
-            mkdir ~/.bash_history_files
-         fi
-
-         history -a  # append current lines to the previous history list
-         history -c  # clear the current history
-         export HISTFILE=~/.bash_history_files/"$HISTNAME"
-         [ ! -e "$HISTFILE" ] && touch "$HISTFILE"
-         history -r  # read the new history file into the current history
-         echo "Switched to new history file $HISTFILE"
-      fi
-
-      export CUR_HISTNAME="$HISTNAME"
-
-   # for non-default histories, keep histories in sync
-   elif [ "$CUR_HISTNAME" != 'default' ]; then
-      # put SOMETHING into the history file if there's nothing there
-      # i couldn't find any other way to get this to work. frustrating!
-      if [ $(stat -f '%z' "$HISTFILE") -eq 0 ]; then
-         echo "Doing initial save of new history file $HISTFILE"
-         history -w
-      fi
-
-      history -a
-      history -n
-   fi
-}
-
-function histname() {
-  export HISTNAME="${1}"
-}
-
 # check the window size after each command and, if necessary,
 # update the values of LINES and COLUMNS.
 shopt -s checkwinsize
@@ -163,9 +121,6 @@ function parse_git_branch {
 }
 
 function prompt_func() {
-   # save the history after every command
-   save_history
-
    # if it's an xterm, set the window title
    case "$TERM" in
       xterm*|rxvt*)
@@ -309,6 +264,23 @@ then
     source /usr/share/fzf/key-bindings.bash
     source /usr/share/fzf/completion.bash
 fi
+
+# blesh (if installed)
+if [ -d "/usr/share/blesh" ]
+then
+  [[ $- == *i* ]] && source /usr/share/blesh/ble.sh
+fi
+
+# zoxide for rapid directory navigation
+if command -v zoxide > /dev/null; then
+  eval "$(zoxide init bash)"
+fi
+
+# atuin for history management
+if command -v atuin > /dev/null; then
+  eval "$(atuin init bash)"
+fi
+
 
 # source .bash_profile for any machine-local settings
 [ -f ${HOME}/.bash_profile ] && source ${HOME}/.bash_profile
