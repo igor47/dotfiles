@@ -237,24 +237,30 @@ export GOPATH=~/.go
 #   asdf plugin add direnv
 #   asdf install direnv 2.20.0
 #   asdf global direnv 2.20.0
-if [ -d "$HOME/repos/asdf" ]
-then
-  #. ${HOME}/repos/asdf/asdf.sh
-  # In order to bypass asdf shims. We *only* add the `ASDF_DIR/bin`
-  # directory to PATH, since we still want to use `asdf` but not its shims.
-  export PATH="$HOME/repos/asdf/bin:$PATH"
+# if [ -d "$HOME/repos/asdf" ]
+# then
+#   #. ${HOME}/repos/asdf/asdf.sh
+#   # In order to bypass asdf shims. We *only* add the `ASDF_DIR/bin`
+#   # directory to PATH, since we still want to use `asdf` but not its shims.
+#   export PATH="$HOME/repos/asdf/bin:$PATH"
+# 
+#   # A shortcut for asdf managed direnv.
+#   direnv() { asdf exec direnv "$@"; }
+# 
+#   # Hook direnv into your shell.
+#   eval "$(direnv hook bash)"
+# 
+#   # add asdf bash completions
+#   . ${HOME}/repos/asdf/completions/asdf.bash
+# 
+#   # add asdf source (created by `asdf direnv setup`)
+#   source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
+# fi
 
-  # A shortcut for asdf managed direnv.
-  direnv() { asdf exec direnv "$@"; }
-
-  # Hook direnv into your shell.
-  eval "$(direnv hook bash)"
-
-  # add asdf bash completions
-  . ${HOME}/repos/asdf/completions/asdf.bash
-
-  # add asdf source (created by `asdf direnv setup`)
-  source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
+# mise
+# https://mise.jdx.dev/installing-mise.html#bash
+if command -v mise > /dev/null; then
+    eval "$(mise activate bash)"
 fi
 
 # fzf -- where does it come from?
@@ -266,21 +272,26 @@ then
 fi
 
 # blesh (if installed)
-if [ -d "/usr/share/blesh" ]
-then
-  [[ $- == *i* ]] && source /usr/share/blesh/ble.sh
-fi
+#if [ -d "/usr/share/blesh" ]
+#then
+#  [[ $- == *i* ]] && source /usr/share/blesh/ble.sh
+#fi
 
 # zoxide for rapid directory navigation
 if command -v zoxide > /dev/null; then
   eval "$(zoxide init bash)"
 fi
 
+# bash preexec (for atuin)
+[[ -f /usr/share/bash-preexec/bash-preexec.sh ]] && source /usr/share/bash-preexec/bash-preexec.sh
+
 # atuin for history management
 if command -v atuin > /dev/null; then
   eval "$(atuin init bash)"
 fi
 
+# pipx should just use my `bin` directory
+export PIPX_BIN_DIR=${HOME}/bin
 
 # source .bash_profile for any machine-local settings
 [ -f ${HOME}/.bash_profile ] && source ${HOME}/.bash_profile

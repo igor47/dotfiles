@@ -44,3 +44,8 @@ Thumbs.db
 # direnv files. ours often just contains `use asdf`
 ##################
 .envrc
+
+# mise files
+# ###################
+mise.toml
+.mise.venv
