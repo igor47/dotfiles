@@ -57,104 +57,6 @@ then
    export LESSCLOSE='/usr/bin/lesspipe %s %s'
 fi
 
-#i got this stuff from https://gist.github.com/634750
-# via http://nuts-and-bolts-of-cakephp.com/2010/11/27/show-git-branch-in-your-bash-prompt/
-
-        RED="\[\033[0;31m\]"
-      GREEN="\[\033[0;32m\]"
-     YELLOW="\[\033[0;33m\]"
-       BLUE="\[\033[0;34m\]"
-     PURPLE="\[\033[0;35m\]"
-       CYAN="\[\033[0;36m\]"
-       GRAY="\[\033[0;37m\]"
-
-   BOLD_RED="\[\033[1;31m\]"
- BOLD_GREEN="\[\033[1;32m\]"
-BOLD_YELLOW="\[\033[1;33m\]"
-  BOLD_BLUE="\[\033[1;34m\]"
-BOLD_PURPLE="\[\033[1;35m\]"
-  BOLD_CYAN="\[\033[1;36m\]"
-  BOLD_GRAY="\[\033[1;37m\]"
-
- COLOR_NONE="\[\e[0m\]"
-
-PROMPT_USER="${BOLD_GREEN}\u@\h${COLOR_NONE}"
-PROMPT_PATH="${BLUE}\w${COLOR_NONE}"
-
-function parse_git_branch {
-   git rev-parse --git-dir &> /dev/null
-   git_status="$(git status 2> /dev/null)"
-   branch_pattern="On branch ([^${IFS}]*)"
-   detached_branch_pattern="HEAD detached at ([^${IFS}]*)"
-   mid_rebase_pattern="You are currently rebasing branch '([^${IFS}]*)' on"
-   remote_pattern="Your branch is (.*) of"
-   diverge_pattern="Your branch and (.*) have diverged"
-   if [[ ${git_status}} =~ "Changed but not updated" ]]; then
-      state="${RED}⚡"
-   fi
- 
-   # add an else if or two here if you want to get more specific
-   if [[ ${git_status} =~ ${remote_pattern} ]]; then
-      if [[ ${BASH_REMATCH[1]} == "ahead" ]]; then
-         remote="${YELLOW}↑"
-      else
-         remote="${YELLOW}↓"
-      fi
-   fi
- 
-   if [[ ${git_status} =~ ${diverge_pattern} ]]; then
-      remote="${YELLOW}↕"
-   fi
-   if [[ ${git_status} =~ ${branch_pattern} ]]; then
-      branch=${BASH_REMATCH[1]}
-   elif [[ ${git_status} =~ ${detached_branch_pattern} ]]; then
-      branch="${YELLOW}${BASH_REMATCH[1]} DETACHED"
-   elif [[ ${git_status} =~ ${mid_rebase_pattern} ]]; then
-      branch="${YELLOW}${BASH_REMATCH[1]} REBASE"
-   fi
-
-   if [[ ${#state} -gt "0" || ${#remote} -gt "0" ]]; then
-      s=" "
-   fi
- 
-   echo "${branch}${s}${remote}${state}"
-}
-
-function prompt_func() {
-   # if it's an xterm, set the window title
-   case "$TERM" in
-      xterm*|rxvt*)
-         echo -ne "\033]0;${USER}@${HOSTNAME}: ${PWD/$HOME/~}\007"
-         ;;
-      *)
-         ;;
-   esac
-
-   # discover git info
-   git rev-parse --git-dir > /dev/null 2>&1
-   if [ $? -eq 0 ]; then
-     PROMPT_GIT=" ${GREEN}{$(parse_git_branch)}${COLOR_NONE}"
-   else
-     PROMPT_GIT=""
-   fi
-
-   # discover virtualenv info
-   if [ ${VIRTUAL_ENV} ]; then
-     envname=$(basename `echo ${VIRTUAL_ENV}`)
-     PROMPT_VIRTUALENV=" ${CYAN}[${envname}]${COLOR_NONE}"
-   else
-     PROMPT_VIRTUALENV=""
-   fi
-
-   # assemble the prompt from pieces
-   PS1="${PROMPT_USER}:${PROMPT_PATH}${PROMPT_VIRTUALENV}${PROMPT_GIT} \$ "
-}
-
-# install the prompt function
-PROMPT_COMMAND=prompt_func
-
-# If this is an xterm set the title to user@host:dir
-
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -288,6 +190,20 @@ fi
 # atuin for history management
 if command -v atuin > /dev/null; then
   eval "$(atuin init bash)"
+fi
+
+# starship for prompt
+if command -v starship > /dev/null; then
+  eval "$(starship init bash)"
+else
+  #i got this stuff from https://gist.github.com/634750
+   BLUE="\[\033[0;34m\]"
+   BOLD_GREEN="\[\033[1;32m\]"
+   COLOR_NONE="\[\e[0m\]"
+
+  PROMPT_USER="${BOLD_GREEN}\u@\h${COLOR_NONE}"
+  PROMPT_PATH="${BLUE}\w${COLOR_NONE}"
+  PS1="${PROMPT_USER}:${PROMPT_PATH} \$ "
 fi
 
 # pipx should just use my `bin` directory
