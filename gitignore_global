@@ -49,3 +49,8 @@ Thumbs.db
 # ###################
 mise.toml
 .mise.venv
+
+# llm dirs
+# ###################
+.aider*
+.claude
