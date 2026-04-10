@@ -1,0 +1,24 @@
+[user]
+name = "Igor Serebryany"
+email = "igor47@moomers.org"
+
+[signing]
+behavior = "own"
+backend = "gpg"
+key = "D0A37C06E95A2D72C2965B96139A885FFDB309E3"
+
+[git]
+sign-on-push = true
+
+[ui]
+default-command = "status"
+diff-editor = ["nvim", "-c", "DiffEditor $left $right $output"]
+
+[templates]
+git_push_bookmark = '"igor/push-" ++ change_id.short()'
+
+[fsmonitor]
+backend = "watchman"
+
+[remotes.origin]
+auto-track-bookmarks = "glob:*"

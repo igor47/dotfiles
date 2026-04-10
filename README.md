@@ -24,6 +24,13 @@ my sequence was:
 tic -xe tmux-256color ~/.tmux/tmux-256color.info
 ```
 
+## jj (jujutsu)
+
+```
+mkdir -p ~/.config/jj
+ln -s ~/repos/dotfiles/jjconfig.toml ~/.config/jj/config.toml
+```
+
 ## ssh config
 
 this should probably just be the base config.
