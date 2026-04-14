@@ -47,7 +47,7 @@ Thumbs.db
 
 # mise files
 # ###################
-mise.toml
+mise.local.toml
 .mise.venv
 
 # llm dirs
