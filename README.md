@@ -19,3 +19,8 @@ see the [relevant blog post](https://igor.moomers.org/arch-linux-config)
 ## notmuch
 
 regularly re-run the notmuch index, including tagging spam messages
+
+## claude-sudo
+
+wrapper that launches `claude` with a sudo timestamp kept alive in the background,
+so claude can run sudo non-interactively without storing a password on disk.

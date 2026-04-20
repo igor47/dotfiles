@@ -1,0 +1,21 @@
+#!/bin/bash
+# Launch claude with a refreshed sudo timestamp held alive in the background,
+# so claude can run sudo non-interactively without an on-disk askpass.
+
+set -euo pipefail
+
+sudo -v
+
+while true; do
+    sudo -nv 2>/dev/null || exit
+    sleep 240
+done &
+keepalive_pid=$!
+
+cleanup() {
+    kill "$keepalive_pid" 2>/dev/null || true
+    sudo -k 2>/dev/null || true
+}
+trap cleanup EXIT
+
+claude "$@"
