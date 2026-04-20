@@ -8,8 +8,8 @@ then
 elif [[ $1 == 'disable' ]]
 then
     echo 'disabling fullcharge'
-    echo 90 | sudo tee /sys/class/power_supply/BAT0/charge_stop_threshold
     echo 85 | sudo tee /sys/class/power_supply/BAT0/charge_start_threshold
+    echo 90 | sudo tee /sys/class/power_supply/BAT0/charge_stop_threshold
 else
     echo 'Usage: fullcharge < enable | disable >'
     exit 1
