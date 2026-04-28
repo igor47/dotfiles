@@ -1,21 +1,149 @@
 #!/bin/bash
-# Launch claude with a refreshed sudo timestamp held alive in the background,
-# so claude can run sudo non-interactively without an on-disk askpass.
+# claude-sudo — launch Claude Code with a usable sudo cache, or manage the
+# global sudo timestamp drop-in directly.
+#
+# Usage:
+#   claude-sudo [claude-args...]      # default: enable global sudo, run claude, revoke on exit
+#   claude-sudo run [claude-args...]  # explicit form of the default
+#   claude-sudo resume                # shorthand for: run --resume
+#   claude-sudo enable [DURATION]     # install drop-in + auto-revert timer (default 30min)
+#   claude-sudo status                # show drop-in + pending revert timer
+#   claude-sudo revoke                # remove drop-in, cancel timer, drop ticket
+#
+# Anything not matching a reserved subcommand is passed through to claude, so
+# `claude-sudo --resume` and `claude-sudo -p ...` Just Work.
+#
+# DURATION accepts systemd time spans: 30min, 1h, 2h30min, 300s, ...
+# Reserved first-arg words: run, resume, enable, status, revoke, help, --help, -h.
 
 set -euo pipefail
 
-sudo -v
+USER_NAME="$(id -un)"
+SAFE="${USER_NAME//[^a-zA-Z0-9_]/_}"
+SUDOERS_FILE="/etc/sudoers.d/claude-global-timestamp-${SAFE}"
+UNIT_PREFIX="claude-sudo-revert-${SAFE}"
 
-while true; do
-    sudo -nv 2>/dev/null || exit
-    sleep 240
-done &
-keepalive_pid=$!
+info() { printf '>> %s\n' "$*" >&2; }
 
-cleanup() {
-    kill "$keepalive_pid" 2>/dev/null || true
-    sudo -k 2>/dev/null || true
+list_units() {
+    systemctl list-units --all --no-legend --plain --type=timer --type=service \
+        "${UNIT_PREFIX}-*.timer" "${UNIT_PREFIX}-*.service" 2>/dev/null \
+        | awk '{print $1}'
 }
-trap cleanup EXIT
 
-claude "$@"
+stop_existing() {
+    local units
+    units=$(list_units)
+    if [[ -n "$units" ]]; then
+        info "sudo: stopping existing revert timer(s): $units"
+        # shellcheck disable=SC2086
+        sudo systemctl stop $units 2>/dev/null || true
+        # shellcheck disable=SC2086
+        sudo systemctl reset-failed $units 2>/dev/null || true
+    fi
+}
+
+install_dropin() {
+    local tmp
+    tmp="$(mktemp)"
+    trap 'rm -f "$tmp"' RETURN
+    printf 'Defaults:%s timestamp_type=global\n' "$USER_NAME" >"$tmp"
+    info "sudo: validating sudoers fragment with visudo -cf"
+    sudo visudo -cf "$tmp" >/dev/null
+    info "sudo: installing drop-in to $SUDOERS_FILE"
+    sudo install -m 0440 -o root -g root "$tmp" "$SUDOERS_FILE"
+}
+
+schedule_revert() {
+    local duration="$1"
+    command -v systemd-run >/dev/null || { echo "systemd-run not available; aborting." >&2; exit 1; }
+    stop_existing
+    local unit="${UNIT_PREFIX}-$(date +%s)-$$"
+    info "sudo: scheduling revert timer $unit.timer (fires in $duration)"
+    sudo systemd-run --on-active="$duration" --unit="$unit" \
+        /bin/rm -f "$SUDOERS_FILE" >/dev/null
+    printf '%s\n' "$unit"
+}
+
+remove_dropin() {
+    stop_existing
+    info "sudo: removing drop-in $SUDOERS_FILE"
+    sudo rm -f "$SUDOERS_FILE"
+    info "sudo: invalidating cached ticket (sudo -k)"
+    sudo -k || true
+}
+
+cmd_status() {
+    if [[ -e "$SUDOERS_FILE" ]]; then
+        echo "drop-in: $SUDOERS_FILE (present)"
+    else
+        echo "drop-in: $SUDOERS_FILE (absent)"
+    fi
+    local units
+    units=$(list_units)
+    if [[ -n "$units" ]]; then
+        echo "pending revert timers:"
+        # shellcheck disable=SC2086
+        systemctl list-timers --all $units 2>/dev/null || true
+    else
+        echo "pending revert timers: none"
+    fi
+}
+
+cmd_revoke() {
+    remove_dropin
+    echo "Revoked: $SUDOERS_FILE removed, timers cancelled, ticket invalidated."
+}
+
+cmd_enable() {
+    local duration="${1:-30min}"
+    install_dropin
+    local unit
+    unit=$(schedule_revert "$duration")
+    cat <<EOF
+Global sudo timestamp enabled for $USER_NAME; reverts in $duration.
+  drop-in : $SUDOERS_FILE
+  timer   : $unit.timer
+Check:   claude-sudo status
+Revoke:  claude-sudo revoke
+EOF
+}
+
+cmd_run() {
+    # If a drop-in is already in place (e.g. from a prior `enable`), leave it
+    # and its timer alone on exit — the user installed it deliberately.
+    # Otherwise install one for this session, with a long-horizon revert timer
+    # as a safety net in case the EXIT trap doesn't fire (e.g. SIGKILL).
+    local installed_here=0
+    if [[ -e "$SUDOERS_FILE" ]]; then
+        info "sudo: drop-in already present, leaving in place on exit"
+    else
+        install_dropin
+        schedule_revert "8h" >/dev/null
+        installed_here=1
+    fi
+
+    cleanup() {
+        if [[ "$installed_here" -eq 1 ]]; then
+            remove_dropin || true
+        fi
+    }
+    trap cleanup EXIT
+
+    # Prime the (now-global) ticket so the first sudo from a tool call won't prompt.
+    sudo -v
+
+    claude "$@"
+}
+
+show_help() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; }
+
+case "${1:-}" in
+    enable)         shift; cmd_enable "$@" ;;
+    status)         cmd_status ;;
+    revoke)         cmd_revoke ;;
+    help|--help|-h) show_help ;;
+    run)            shift; cmd_run "$@" ;;
+    resume)         shift; cmd_run --resume "$@" ;;
+    *)              cmd_run "$@" ;;
+esac
