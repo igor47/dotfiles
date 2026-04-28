@@ -9,19 +9,22 @@
 #   claude-sudo enable [DURATION]     # install drop-in + auto-revert timer (default 30min)
 #   claude-sudo status                # show drop-in + pending revert timer
 #   claude-sudo revoke                # remove drop-in, cancel timer, drop ticket
+#   claude-sudo indicator             # tmux statusline indicator (empty if no session)
 #
 # Anything not matching a reserved subcommand is passed through to claude, so
 # `claude-sudo --resume` and `claude-sudo -p ...` Just Work.
 #
 # DURATION accepts systemd time spans: 30min, 1h, 2h30min, 300s, ...
-# Reserved first-arg words: run, resume, enable, status, revoke, help, --help, -h.
+# Reserved first-arg words: run, resume, enable, status, revoke, indicator, help, --help, -h.
 
 set -euo pipefail
 
 USER_NAME="$(id -un)"
+USER_UID="$(id -u)"
 SAFE="${USER_NAME//[^a-zA-Z0-9_]/_}"
 SUDOERS_FILE="/etc/sudoers.d/claude-global-timestamp-${SAFE}"
 UNIT_PREFIX="claude-sudo-revert-${SAFE}"
+MARKER_DIR="/run/user/${USER_UID}/claude-sudo"
 
 info() { printf '>> %s\n' "$*" >&2; }
 
@@ -46,12 +49,12 @@ stop_existing() {
 install_dropin() {
     local tmp
     tmp="$(mktemp)"
-    trap 'rm -f "$tmp"' RETURN
     printf 'Defaults:%s timestamp_type=global\n' "$USER_NAME" >"$tmp"
     info "sudo: validating sudoers fragment with visudo -cf"
     sudo visudo -cf "$tmp" >/dev/null
     info "sudo: installing drop-in to $SUDOERS_FILE"
     sudo install -m 0440 -o root -g root "$tmp" "$SUDOERS_FILE"
+    rm -f "$tmp"
 }
 
 schedule_revert() {
@@ -109,31 +112,82 @@ Revoke:  claude-sudo revoke
 EOF
 }
 
+# cmd_run state is held in script-globals so the EXIT trap can read them
+# after cmd_run returns (locals would be out of scope by then under set -u).
+RUN_INSTALLED_HERE=0
+RUN_KEEPALIVE_PID=
+RUN_MARKER_FILE=
+
+run_cleanup() {
+    [[ -n $RUN_KEEPALIVE_PID ]] && kill "$RUN_KEEPALIVE_PID" 2>/dev/null || true
+    [[ -n $RUN_MARKER_FILE ]] && rm -f "$RUN_MARKER_FILE"
+    rmdir "$MARKER_DIR" 2>/dev/null || true
+    if [[ $RUN_INSTALLED_HERE -eq 1 ]]; then
+        remove_dropin || true
+    fi
+}
+
 cmd_run() {
+    trap run_cleanup EXIT
+
     # If a drop-in is already in place (e.g. from a prior `enable`), leave it
     # and its timer alone on exit — the user installed it deliberately.
     # Otherwise install one for this session, with a long-horizon revert timer
     # as a safety net in case the EXIT trap doesn't fire (e.g. SIGKILL).
-    local installed_here=0
     if [[ -e "$SUDOERS_FILE" ]]; then
         info "sudo: drop-in already present, leaving in place on exit"
     else
         install_dropin
         schedule_revert "8h" >/dev/null
-        installed_here=1
+        RUN_INSTALLED_HERE=1
     fi
 
-    cleanup() {
-        if [[ "$installed_here" -eq 1 ]]; then
-            remove_dropin || true
-        fi
-    }
-    trap cleanup EXIT
+    # Drop a session marker (start time in epoch seconds) so the tmux statusline
+    # — via `claude-sudo indicator` — can show that this session is still open.
+    mkdir -p "$MARKER_DIR"
+    RUN_MARKER_FILE="$MARKER_DIR/$$"
+    date +%s >"$RUN_MARKER_FILE"
 
     # Prime the (now-global) ticket so the first sudo from a tool call won't prompt.
     sudo -v
 
+    # The global drop-in only widens *scope* (any tty/process sees the ticket);
+    # it does not extend timestamp_timeout (default ~5min). Without periodic
+    # refresh the cache expires mid-session and claude's tty-less Bash can't
+    # re-prompt — so keep it warm from this tty.
+    (
+        while true; do
+            sudo -nv 2>/dev/null || exit
+            sleep 240
+        done
+    ) &
+    RUN_KEEPALIVE_PID=$!
+
     claude "$@"
+}
+
+cmd_indicator() {
+    # Emits a full status-bar separator block so the tmux config can drop its
+    # own `][` between this and the next section. When inactive, renders the
+    # plain green `][` separator. When active, splits into `] [SUDO Xm] [` so
+    # the SUDO label sits inside its own bracket.
+    local oldest now elapsed hours mins
+    if [[ -d $MARKER_DIR ]]; then
+        oldest=$(cat "$MARKER_DIR"/* 2>/dev/null | sort -n | head -n1)
+    fi
+    if [[ -z ${oldest:-} ]]; then
+        printf '#[fg=green]][#[default] '
+        return 0
+    fi
+    now=$(date +%s)
+    elapsed=$(( now - oldest ))
+    hours=$(( elapsed / 3600 ))
+    mins=$(( (elapsed % 3600) / 60 ))
+    if (( hours > 0 )); then
+        printf '#[fg=green]] #[fg=red,bold][SUDO %dh%02dm]#[default] #[fg=green][#[default] ' "$hours" "$mins"
+    else
+        printf '#[fg=green]] #[fg=red,bold][SUDO %dm]#[default] #[fg=green][#[default] ' "$mins"
+    fi
 }
 
 show_help() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; }
@@ -142,6 +196,7 @@ case "${1:-}" in
     enable)         shift; cmd_enable "$@" ;;
     status)         cmd_status ;;
     revoke)         cmd_revoke ;;
+    indicator)      cmd_indicator ;;
     help|--help|-h) show_help ;;
     run)            shift; cmd_run "$@" ;;
     resume)         shift; cmd_run --resume "$@" ;;
