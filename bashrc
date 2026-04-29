@@ -14,6 +14,20 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
+# MSYS2 / Cygwin / Git-bash: the Windows-Terminal launcher passes through
+# the host PATH with ; separators (msys2_shell.cmd's -use-full-path inherits
+# the full Windows PATH). Bash uses : as PATH separator, so unconverted
+# Windows PATH means command lookup breaks past the first ; (`ls` -> not
+# found). cygpath -p converts the whole PATH between the two formats.
+case "${OSTYPE:-$(uname -s 2>/dev/null)}" in
+    msys*|MINGW*|MSYS*|cygwin*|CYGWIN*)
+        if [[ "$PATH" == *";"* ]] && command -v cygpath >/dev/null 2>&1; then
+            PATH=$(cygpath -p "$PATH")
+            export PATH
+        fi
+        ;;
+esac
+
 # always use the 256-color version of xterm if xterm is the termtype
 if [ "x$TERM" = "xxterm" ]
 then
