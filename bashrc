@@ -19,10 +19,12 @@ fi
 # the full Windows PATH). Bash uses : as PATH separator, so unconverted
 # Windows PATH means command lookup breaks past the first ; (`ls` -> not
 # found). cygpath -p converts the whole PATH between the two formats.
+# Use the absolute path to cygpath since `command -v` can't find anything
+# under /usr/bin while PATH is still broken.
 case "${OSTYPE:-$(uname -s 2>/dev/null)}" in
     msys*|MINGW*|MSYS*|cygwin*|CYGWIN*)
-        if [[ "$PATH" == *";"* ]] && command -v cygpath >/dev/null 2>&1; then
-            PATH=$(cygpath -p "$PATH")
+        if [[ "$PATH" == *";"* ]] && [ -x /usr/bin/cygpath ]; then
+            PATH=$(/usr/bin/cygpath -p "$PATH")
             export PATH
         fi
         ;;
