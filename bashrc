@@ -14,19 +14,28 @@ if [ -f /etc/bashrc ]; then
     . /etc/bashrc
 fi
 
-# MSYS2 / Cygwin / Git-bash: the Windows-Terminal launcher passes through
-# the host PATH with ; separators (msys2_shell.cmd's -use-full-path inherits
-# the full Windows PATH). Bash uses : as PATH separator, so unconverted
-# Windows PATH means command lookup breaks past the first ; (`ls` -> not
-# found). cygpath -p converts the whole PATH between the two formats.
-# Use the absolute path to cygpath since `command -v` can't find anything
-# under /usr/bin while PATH is still broken.
+# MSYS2 / Cygwin / Git-bash: bash uses : as PATH separator, Windows uses
+# ;. Confirmed sources of Windows-format PATH on this system:
+#   - msys2_shell.cmd's -use-full-path (Windows-Terminal default profile)
+#     -> launcher passes through the host PATH unconverted.
+#   - `eval "$(mise activate bash)"` -> mise.exe is a Windows-native
+#     binary and emits Windows-format paths in its activate script.
+# cygpath -p converts a whole PATH between formats. Define this as a
+# function so we can call it after each potential breakage point and from
+# PROMPT_COMMAND (mise's per-prompt hook re-emits Windows-format PATH on
+# every cd into a project dir). Absolute path to cygpath since `command -v`
+# can't find anything under /usr/bin while PATH is broken.
+_fix_msys_path() {
+    if [[ "$PATH" == *";"* ]] && [ -x /usr/bin/cygpath ]; then
+        PATH=$(/usr/bin/cygpath -p "$PATH")
+        export PATH
+    fi
+}
 case "${OSTYPE:-$(uname -s 2>/dev/null)}" in
     msys*|MINGW*|MSYS*|cygwin*|CYGWIN*)
-        if [[ "$PATH" == *";"* ]] && [ -x /usr/bin/cygpath ]; then
-            PATH=$(/usr/bin/cygpath -p "$PATH")
-            export PATH
-        fi
+        _fix_msys_path
+        # Hook so PATH stays converted after mise's per-prompt hook fires.
+        PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND$'\n'}_fix_msys_path"
         ;;
 esac
 
@@ -179,6 +188,10 @@ export GOPATH=~/.go
 # https://mise.jdx.dev/installing-mise.html#bash
 if command -v mise > /dev/null; then
     eval "$(mise activate bash)"
+    # On MSYS2/Cygwin the eval above replaces PATH with Windows-format
+    # paths (mise.exe is a Windows binary). Re-convert before subsequent
+    # bashrc lines run so they see a sane PATH.
+    type _fix_msys_path >/dev/null 2>&1 && _fix_msys_path
 fi
 
 # fzf -- where does it come from?
