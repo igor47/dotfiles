@@ -17,6 +17,7 @@ mailboxes ~/Maildir
 #my saved mail
 set mbox_type=Maildir
 
+set spoolfile="~/Maildir"
 set folder="~/Maildir"
 set mbox=~/Maildir		#where stuff gets moved to
 set move=no				#but don't move by default
@@ -24,10 +25,16 @@ set mask="!^\\.[^.]"	#mask out . files
 
 set postponed=+drafts
 set record=+sent-mail
-set hdr_format="%Z %3C %{%b %d} %-19.19L (%5c) %s"
+set index_format="%Z %3C %{%b %d} %-19.19L (%5c) %s"
 set confirmappend=no
 save-hook . =archive
 set header_cache=~/.neomutt/headercache
+
+# tag messages with List-Unsubscribe header for filtering with ~H
+spam "List-Unsubscribe:.*" "bulk"
+
+# unsubscribe from the current message's mailing list
+macro index,pager U "<pipe-message>list-unsubscribe<enter>" "Unsubscribe via List-Unsubscribe header"
 
 # strict threads -- don't group messages with the same subject line
 set strict_threads
@@ -50,7 +57,7 @@ set query_format="%4c %t %-70.70a %-70.70n %?e?(%e)?"
 
 # save more history
 set save_history=25
-set history_file=~/.mutt/history
+set history_file=~/.neomutt/history
 
 set charset="utf-8"
 set pager_stop=yes
@@ -69,6 +76,9 @@ auto_view text/html
 
 set autoedit=yes
 set edit_headers=yes
+# format=flowed lets receiving mail clients (like gmail) reflow text
+# instead of displaying hard line breaks; see also ~/.vim/ftplugin/mail.vim
+set text_flowed=yes
 set editor="/usr/bin/vim -c 'set textwidth=72' -c 'setlocal spell spelllang=en_us'"
 
 ignore *
@@ -103,6 +113,17 @@ set virtual_spoolfile = no
 virtual-mailboxes "NMInbox" "notmuch://?query=tag:inbox"
 virtual-mailboxes "NMArchive" "notmuch://?query=tag:archive"
 macro index \Cf "<vfolder-from-query>"
+
+# notmuch query window -- show 1 year of results, page with < and >
+set nm_query_window_enable = yes
+set nm_query_window_duration = 1
+set nm_query_window_timebase = "year"
+bind index < vfolder-window-backward
+bind index > vfolder-window-forward
+
+# refresh notmuch index and check for new mail
+set timeout = 30
+macro index G "<shell-escape>notmuch-new.sh<enter><check-stats>" "Index new mail and refresh"
 
 #####INDEX#####
 # Not implemented are:  J Tab Z A # M O
