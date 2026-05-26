@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Open the Claude Code transcript for the session running in the current tmux pane.
+# Maps: pane PID -> claude child PID -> ~/.claude/sessions/<pid>.json -> transcript jsonl
+set -euo pipefail
+
+pane_pid=$(tmux display-message -p '#{pane_pid}')
+claude_pid=$(pgrep -P "$pane_pid" claude | head -1 || true)
+
+if [[ -z "${claude_pid:-}" ]]; then
+  tmux display-message "no claude process in this pane"
+  exit 0
+fi
+
+session_file="$HOME/.claude/sessions/$claude_pid.json"
+if [[ ! -f "$session_file" ]]; then
+  tmux display-message "no session file for pid $claude_pid"
+  exit 0
+fi
+
+session_id=$(jq -r .sessionId "$session_file")
+cwd=$(jq -r .cwd "$session_file")
+encoded=${cwd//\//-}
+transcript="$HOME/.claude/projects/$encoded/$session_id.jsonl"
+
+if [[ ! -f "$transcript" ]]; then
+  tmux display-message "no transcript at $transcript"
+  exit 0
+fi
+
+out=$(mktemp)
+jq -r '
+  select(.type == "user" or .type == "assistant") |
+  "\n=== " + (.type | ascii_upcase) + " ===\n" +
+  (if (.message.content | type) == "array"
+   then (.message.content | map(.text // ("[" + (.type // "item") + "]")) | join("\n"))
+   else (.message.content // "")
+   end)
+' "$transcript" > "$out"
+
+layout=$(tmux display-message -p '#{window_layout}')
+channel="transcript-$$"
+tmux split-window -b -v -l 70% "less -R +G '$out'; rm '$out'; tmux wait-for -S $channel"
+tmux run-shell -b "tmux wait-for $channel; sleep 0.2; tmux select-layout '$layout'"
