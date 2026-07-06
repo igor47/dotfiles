@@ -14,6 +14,15 @@ mkdir -p ~/.config/alacritty
 ln -s ~/repos/dotfiles/alacritty.yml ~/.config/alacritty/
 ```
 
+## kitty
+
+this config file should be symlinked into a `.config`:
+
+```
+mkdir -p ~/.config/kitty
+ln -s ~/repos/dotfiles/kitty.conf ~/.config/kitty/
+```
+
 ## tmux on osx (arm)
 
 i needed help from [here](https://github.com/tmux/tmux/issues/1257#issuecomment-581378716) to get termtype info correct.
