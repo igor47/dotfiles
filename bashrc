@@ -156,34 +156,6 @@ export LESS='--RAW-CONTROL-CHARS --tabs=8 -R'
 # gopath
 export GOPATH=~/.go
 
-# asdf
-# this is installed like so:
-#   git clone https://github.com/asdf-vm/asdf.git ~/repos/asdf
-#   cd ~/repos/asdf && git checkout v0.7.8 && cd -
-# we require direnv:
-#   asdf plugin add direnv
-#   asdf install direnv 2.20.0
-#   asdf global direnv 2.20.0
-# if [ -d "$HOME/repos/asdf" ]
-# then
-#   #. ${HOME}/repos/asdf/asdf.sh
-#   # In order to bypass asdf shims. We *only* add the `ASDF_DIR/bin`
-#   # directory to PATH, since we still want to use `asdf` but not its shims.
-#   export PATH="$HOME/repos/asdf/bin:$PATH"
-# 
-#   # A shortcut for asdf managed direnv.
-#   direnv() { asdf exec direnv "$@"; }
-# 
-#   # Hook direnv into your shell.
-#   eval "$(direnv hook bash)"
-# 
-#   # add asdf bash completions
-#   . ${HOME}/repos/asdf/completions/asdf.bash
-# 
-#   # add asdf source (created by `asdf direnv setup`)
-#   source "${XDG_CONFIG_HOME:-$HOME/.config}/asdf-direnv/bashrc"
-# fi
-
 # mise
 # https://mise.jdx.dev/installing-mise.html#bash
 if command -v mise > /dev/null; then
