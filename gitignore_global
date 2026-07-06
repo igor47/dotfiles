@@ -41,7 +41,7 @@ Thumbs.db
 .*sw?
 .vimrc.local
 
-# direnv files. ours often just contains `use asdf`
+# direnv / mise per-project env files
 ##################
 .envrc
 
