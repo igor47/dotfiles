@@ -6,11 +6,8 @@
 [push]
   default = current
 
-[core]
-  excludesfile = ~/.gitignore_global
-
 [include]
-  path = ~/.gitconfig.local
+  path = ~/.config/git/config.local
 
 [filter "lfs"]
   clean = git-lfs clean -- %f
