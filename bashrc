@@ -185,8 +185,12 @@ if command -v zoxide > /dev/null; then
   eval "$(zoxide init bash)"
 fi
 
-# bash preexec (for atuin)
-[[ -f /usr/share/bash-preexec/bash-preexec.sh ]] && source /usr/share/bash-preexec/bash-preexec.sh
+# bash preexec (for atuin) — try Linux (distro package) then macOS (Homebrew)
+for _bp in /usr/share/bash-preexec/bash-preexec.sh \
+           /opt/homebrew/etc/profile.d/bash-preexec.sh; do
+    [[ -f $_bp ]] && { source "$_bp"; break; }
+done
+unset _bp
 
 # atuin for history management
 if command -v atuin > /dev/null; then
