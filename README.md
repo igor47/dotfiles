@@ -21,6 +21,7 @@ so the tracked files stay portable:
 | `jjconfig.toml`          | `~/.config/jj/config.toml`        | XDG   |
 | `alacritty.yml`          | `~/.config/alacritty/alacritty.yml` | XDG |
 | `kitty.conf`             | `~/.config/kitty/kitty.conf`      | XDG   |
+| `starship.toml`          | `~/.config/starship.toml`         | XDG; starship's default config path |
 | `config-direnv-direnvrc` | `~/.config/direnv/direnvrc`       | XDG   |
 | `bashrc`                 | `~/.bashrc`                       | bash: `$HOME` only |
 | `ssh_config`             | `~/.ssh/config`                   | ssh: `$HOME` only; base config, add hosts below `moomers` |
@@ -41,6 +42,7 @@ tmux.conf              tmux/tmux.conf
 jjconfig.toml          jj/config.toml
 alacritty.yml          alacritty/alacritty.yml
 kitty.conf             kitty/kitty.conf
+starship.toml          starship.toml
 config-direnv-direnvrc direnv/direnvrc
 EOF
 ```

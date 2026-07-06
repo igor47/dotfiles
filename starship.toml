@@ -1,0 +1,99 @@
+# Starship configuration to replicate your custom bash prompt
+# Save this as ~/.config/starship.toml
+
+# Overall format - order of modules
+format = """
+$username\
+$hostname\
+$directory\
+$python\
+$git_branch\
+$git_status\
+$custom\
+$character"""
+
+# Disable the blank line at the start of the prompt
+add_newline = false
+
+# Username module (bold green)
+[username]
+show_always = true
+style_user = "bold green"
+style_root = "bold red"
+format = "[$user]($style)"
+
+# Hostname module (bold green with @)
+[hostname]
+ssh_only = false
+format = "[@$hostname](bold green)"
+
+# Directory module (blue, replaces \w)
+[directory]
+style = "blue"
+format = "[:$path]($style)"
+truncation_length = 0
+truncate_to_repo = false
+
+# Python virtual environment (cyan in brackets)
+[python]
+format = "[ \\[${pyenv_prefix}${version}\\]]($style)"
+style = "cyan"
+# Only show when in a virtual environment
+detect_extensions = []
+detect_files = []
+detect_folders = []
+python_binary = ["python", "python3"]
+
+# Git branch
+[git_branch]
+format = " [{$branch}]($style)"
+style = "green"
+
+# Git status with custom symbols to match your setup
+[git_status]
+format = "[$all_status$ahead_behind]($style)"
+style = "green"
+# Replicate your symbols
+conflicted = "≠"
+ahead = "↑"
+behind = "↓"
+diverged = "↕"
+untracked = "?"
+stashed = "≡"
+modified = "●"
+staged = "+"
+renamed = "→"
+deleted = "✘"
+
+# Character (prompt symbol)
+[character]
+success_symbol = " [\\$](white) "
+error_symbol = " [\\$](red) "
+format = "$symbol"
+
+[custom.jj]
+when = "jj workspace root"
+command = "jj log -r @ -T 'change_id.short()' --no-graph"
+format = " [{$output}](green)"
+
+# Disable modules we don't want
+[aws]
+disabled = true
+[conda]
+disabled = true
+[docker_context]
+disabled = true
+[gcloud]
+disabled = true
+[kubernetes]
+disabled = true
+[nodejs]
+disabled = true
+[package]
+disabled = true
+[ruby]
+disabled = true
+[rust]
+disabled = true
+[terraform]
+disabled = true
