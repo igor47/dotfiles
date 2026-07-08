@@ -1,0 +1,65 @@
+#!/bin/bash
+# rtssh — persistent ssh+tmux session with automatic reconnect.
+#
+# Usage: rtssh <host> [tmux-session-name]
+#
+# ssh into <host> and attach to (or create) a tmux session there. If the
+# connection drops — network blip, laptop sleep/wake, the Secretive Secure
+# Enclave agent being briefly unreachable right after wake — reconnect
+# automatically with backoff instead of leaving a stuck session behind.
+#
+# BatchMode=yes is the key fix: it stops ssh from ever blocking on an
+# interactive password prompt. Without it, a pubkey failure (e.g. the Secure
+# Enclave not yet available right after wake, before the screen is unlocked)
+# falls through to a "Password:" prompt that nobody is present to answer,
+# and the session just hangs there instead of retrying.
+#
+# ssh exits 255 specifically for connection-level failures (auth failure,
+# dropped connection, etc); it exits with the remote command's own status
+# when the session ends normally (e.g. you detached from tmux on purpose).
+# We only retry on 255, so an intentional detach still exits cleanly.
+#
+# See: https://pempek.net/articles/2013/04/24/vpn-less-persistent-ssh-sessions/
+
+set -uo pipefail
+
+if [[ -z "${1:-}" ]]; then
+    echo "usage: rtssh <host> [tmux-session-name]" >&2
+    exit 1
+fi
+HOST="$1"
+SESSION="${2:-}"
+
+if [[ -n "$SESSION" ]]; then
+    REMOTE_CMD="if tmux -qu has -t '$SESSION'; then tmux -qu attach -t '$SESSION'; else EDITOR=vim tmux -qu new -s '$SESSION'; fi"
+else
+    REMOTE_CMD="if tmux -qu has; then tmux -qu attach; else EDITOR=vim tmux -qu new; fi"
+fi
+
+info() { printf '>> rtssh: %s\n' "$*" >&2; }
+
+delay=2
+max_delay=60
+
+while true; do
+    start=$SECONDS
+    ssh -o BatchMode=yes "$HOST" -t "$REMOTE_CMD"
+    status=$?
+    elapsed=$(( SECONDS - start ))
+
+    if [[ $status -ne 255 ]]; then
+        info "session ended (exit $status), not retrying."
+        exit "$status"
+    fi
+
+    # A connection that lasted a while was a real session that later broke;
+    # reset the backoff. One that died instantly is likely still broken
+    # (bad host, enclave still locked) so keep backing off.
+    if (( elapsed >= 15 )); then
+        delay=2
+    fi
+
+    info "connection lost (exit 255) after ${elapsed}s, retrying in ${delay}s..."
+    sleep "$delay"
+    delay=$(( delay * 2 > max_delay ? max_delay : delay * 2 ))
+done

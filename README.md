@@ -24,3 +24,10 @@ regularly re-run the notmuch index, including tagging spam messages
 
 wrapper that launches `claude` with a sudo timestamp kept alive in the background,
 so claude can run sudo non-interactively without storing a password on disk.
+
+## rtssh
+
+persistent ssh+tmux session (`rtssh <host> [session]`) that retries with backoff
+on connection-level failures instead of hanging on a password prompt nobody's
+there to answer. formerly a `.bashrc` function; moved here to add retry logic.
+see [the blog post](https://pempek.net/articles/2013/04/24/vpn-less-persistent-ssh-sessions/).
