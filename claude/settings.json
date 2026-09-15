@@ -3,7 +3,6 @@
   "permissions": {
     "defaultMode": "auto"
   },
-  "effortLevel": "high",
   "tui": "fullscreen",
   "editorMode": "vim",
   "remoteControlAtStartup": true,

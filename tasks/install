@@ -5,6 +5,11 @@
 set -euo pipefail
 
 repo="${MISE_PROJECT_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+# mise resolves symlinks in the project root; when $HOME itself is a symlink
+# (purr: /home/x -> /mnt/raid/home/x) prefer the $HOME-based spelling so links
+# read naturally and survive the mount moving.
+real_home="$(readlink -f "$HOME")"
+[ "$real_home" != "$HOME" ] && repo="${repo/#$real_home/$HOME}"
 dry="${usage_dry_run:-false}"
 force="${usage_force:-false}"
 
@@ -55,7 +60,7 @@ while read -r mode src dst; do
   case "$mode" in
     link)
       if [ -L "$to" ]; then
-        if [ "$(readlink "$to")" = "$from" ]; then
+        if [ "$(readlink -f "$to")" = "$(readlink -f "$from")" ]; then
           say ok "$dst"
         else
           say relink "$dst -> $src  (was $(readlink "$to"))"
