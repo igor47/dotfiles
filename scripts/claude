@@ -24,6 +24,10 @@ if [ -n "${CLAUDE_WRAPPED:-}" ]; then
 fi
 export CLAUDE_WRAPPED=1
 
+# jj commands that would open an editor (describe/commit/split without -m)
+# hang forever in Claude's tty-less shell; with this they fail in <1s instead.
+export JJ_EDITOR=false
+
 args=()
 settings="$HOME/repos/dotfiles/claude/settings.json"
 [ -r "$settings" ] && args+=(--settings "$settings")
