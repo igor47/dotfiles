@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Build and install Lock.app into ~/Applications, so that Spotlight
+# (cmd-space, "lock") locks the screen.
+set -euo pipefail
+
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP="$HOME/Applications/Lock.app"
+
+# Only needs to be stable across rebuilds -- macOS keys the Accessibility
+# grant to it, so changing it means re-granting permission.
+BUNDLE_ID="com.igor47.locklauncher"
+
+plist() { /usr/libexec/PlistBuddy -c "$1" "$APP/Contents/Info.plist"; }
+
+mkdir -p "$HOME/Applications"
+
+src="$(mktemp -t lock).applescript"
+trap 'rm -f "$src"' EXIT
+cat > "$src" <<'EOF'
+tell application "System Events"
+	key code 12 using {command down, control down}
+end tell
+EOF
+
+rm -rf "$APP"
+osacompile -o "$APP" "$src"
+
+# osacompile ships an asset catalog that wins over applet.icns; drop both it
+# and the CFBundleIconName that points at it.
+cp "$HERE/Lock.icns" "$APP/Contents/Resources/applet.icns"
+rm -f "$APP/Contents/Resources/Assets.car"
+plist "Delete :CFBundleIconName" 2>/dev/null || true
+
+# Name the executable Lock, not applet -- it's what shows up in the
+# Accessibility permission list.
+mv "$APP/Contents/MacOS/applet" "$APP/Contents/MacOS/Lock"
+plist "Set :CFBundleExecutable Lock"
+
+plist "Add :CFBundleName string Lock" 2>/dev/null || plist "Set :CFBundleName Lock"
+plist "Add :CFBundleIdentifier string $BUNDLE_ID" 2>/dev/null \
+  || plist "Set :CFBundleIdentifier $BUNDLE_ID"
+# No Dock icon or menu bar presence when it runs.
+plist "Add :LSUIElement bool true" 2>/dev/null || plist "Set :LSUIElement true"
+
+touch "$APP"
+codesign --force --deep --sign - "$APP"
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$APP"
+mdimport "$APP"
+
+cat <<'EOF'
+
+Installed ~/Applications/Lock.app
+
+One manual step -- macOS won't let a script grant this:
+
+  System Settings > Privacy & Security > Accessibility > + > ~/Applications/Lock.app
+
+Without it the app fails with "Lock is not allowed to send keystrokes (1002)".
+
+Then cmd-space, type "lock", hit enter. If Spotlight doesn't find it or the
+icon looks stale, `killall Finder Dock` to flush the caches.
+EOF

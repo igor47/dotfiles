@@ -44,6 +44,17 @@ starship.toml          starship.toml
 EOF
 ```
 
+## Lock.app (macOS)
+
+`lock-app/install` builds `~/Applications/Lock.app`, so cmd-space → "lock"
+locks the screen. It's an AppleScript applet that sends cmd-ctrl-Q, with a
+padlock icon so it's recognizable in Spotlight.
+
+Needs one manual step afterward — macOS won't let a script grant it:
+**System Settings → Privacy & Security → Accessibility → + →
+`~/Applications/Lock.app`**. Without it the app fails with
+`Lock is not allowed to send keystrokes (1002)`.
+
 ## tmux on osx (arm)
 
 i needed help from [here](https://github.com/tmux/tmux/issues/1257#issuecomment-581378716) to get termtype info correct.
