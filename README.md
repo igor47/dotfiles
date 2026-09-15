@@ -20,6 +20,14 @@ see the [relevant blog post](https://igor.moomers.org/arch-linux-config)
 
 regularly re-run the notmuch index, including tagging spam messages
 
+## claude
+
+the `claude` on PATH (via `~/bin`). runs the real binary from `~/.local/bin`
+without needing that directory on PATH, layers the tracked settings from
+`~/repos/dotfiles/claude/settings.json` on top with `--settings`, and pins the
+tmux window name for the session. anything that shells out to `claude`,
+including `claude-sudo`, goes through it.
+
 ## claude-sudo
 
 wrapper that launches `claude` with a sudo timestamp kept alive in the background,
