@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# copy/paste commands across platforms
+if command -v pbcopy &>/dev/null
+then
+    pbcopy $@
+elif command -v wl-copy &>/dev/null
+then
+    wl-copy $@
+else
+    echo 'not copied!' && exit 1
+fi
+

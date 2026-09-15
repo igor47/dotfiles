@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# claude — the `claude` on PATH. Wraps the Claude Code binary so that every
+# launch, including from other scripts such as claude-sudo, gets the same setup:
+#
+#   * runs the binary by its install path, so ~/.local/bin can stay off PATH
+#   * layers the tracked settings from the dotfiles repo on top via --settings
+#     (claude never writes to that file, so it can live in git without churn)
+#   * inside tmux, pins the window name; claude sets its process title to the
+#     version number (anthropics/claude-code#12433), which tmux's automatic
+#     rename would otherwise display. Restored on exit, including ctrl-c.
+#
+# Nested launches (claude running `claude` from a shell tool) skip all of that.
+set -euo pipefail
+
+real="$HOME/.local/bin/claude"
+if [ ! -x "$real" ]; then
+  echo "claude: no binary at $real" >&2
+  echo "install with: curl -fsSL https://claude.ai/install.sh | bash" >&2
+  exit 127
+fi
+
+if [ -n "${CLAUDE_WRAPPED:-}" ]; then
+  exec "$real" "$@"
+fi
+export CLAUDE_WRAPPED=1
+
+args=()
+settings="$HOME/repos/dotfiles/claude/settings.json"
+[ -r "$settings" ] && args+=(--settings "$settings")
+
+if [ -n "${TMUX:-}" ]; then
+  trap 'tmux setw allow-rename on \; setw automatic-rename on' EXIT
+  tmux setw allow-rename off \; rename-window "claude:${PWD##*/}"
+fi
+
+"$real" ${args[@]+"${args[@]}"} "$@"

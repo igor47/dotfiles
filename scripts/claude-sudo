@@ -1,0 +1,287 @@
+#!/bin/bash
+# claude-sudo — launch Claude Code with a usable sudo cache, or manage the
+# global sudo timestamp drop-in directly.
+#
+# Usage:
+#   claude-sudo [claude-args...]      # default: enable global sudo, run claude, revoke on exit
+#   claude-sudo run [claude-args...]  # explicit form of the default
+#   claude-sudo resume                # shorthand for: run --resume
+#   claude-sudo enable [DURATION]     # install drop-in + auto-revert timer (default 30min)
+#   claude-sudo status                # show drop-in + pending revert timer
+#   claude-sudo revoke                # remove drop-in, cancel timer, drop ticket
+#   claude-sudo indicator             # tmux statusline indicator (empty if no session)
+#
+# Anything not matching a reserved subcommand is passed through to claude, so
+# `claude-sudo --resume` and `claude-sudo -p ...` Just Work.
+#
+# DURATION accepts time spans: 30min, 1h, 2h30min, 300s, ...
+# Reserved first-arg words: run, resume, enable, status, revoke, indicator, help, --help, -h.
+#
+# Cross-platform: on Linux the revert timer uses systemd-run; on macOS (Darwin),
+# which has no systemd, it uses a detached root background process instead.
+
+set -euo pipefail
+
+OS="$(uname -s)"
+USER_NAME="$(id -un)"
+USER_UID="$(id -u)"
+SAFE="${USER_NAME//[^a-zA-Z0-9_]/_}"
+SUDOERS_FILE="/etc/sudoers.d/claude-global-timestamp-${SAFE}"
+
+if [[ "$OS" == "Darwin" ]]; then
+    ROOT_GROUP="wheel"
+    STATE_DIR="${HOME}/.cache/claude-sudo"
+    MARKER_DIR="${STATE_DIR}/markers"
+    REVERT_DIR="${STATE_DIR}/revert"
+else
+    ROOT_GROUP="root"
+    UNIT_PREFIX="claude-sudo-revert-${SAFE}"
+    MARKER_DIR="/run/user/${USER_UID}/claude-sudo"
+fi
+
+info() { printf '>> %s\n' "$*" >&2; }
+
+# Convert a systemd-style span (30min, 1h, 2h30min, 300s, 45s, 1d) to seconds.
+parse_duration() {
+    local d="$1" total=0
+    if [[ "$d" =~ ^[0-9]+$ ]]; then echo "$d"; return 0; fi
+    while [[ -n "$d" ]]; do
+        if [[ "$d" =~ ^([0-9]+)(d|h|min|s)(.*)$ ]]; then
+            local num="${BASH_REMATCH[1]}" unit="${BASH_REMATCH[2]}"
+            d="${BASH_REMATCH[3]}"
+            case "$unit" in
+                d)   total=$((total + num * 86400)) ;;
+                h)   total=$((total + num * 3600)) ;;
+                min) total=$((total + num * 60)) ;;
+                s)   total=$((total + num)) ;;
+            esac
+        else
+            echo "claude-sudo: invalid duration: $1" >&2; return 1
+        fi
+    done
+    echo "$total"
+}
+
+# ---- revert-timer backends (differ per OS) --------------------------------
+
+list_units() {  # Linux only
+    systemctl list-units --all --no-legend --plain --type=timer --type=service \
+        "${UNIT_PREFIX}-*.timer" "${UNIT_PREFIX}-*.service" 2>/dev/null \
+        | awk '{print $1}'
+}
+
+stop_existing() {
+    if [[ "$OS" == "Darwin" ]]; then
+        [[ -d "$REVERT_DIR" ]] || return 0
+        local f pid
+        for f in "$REVERT_DIR"/*; do
+            [[ -e "$f" ]] || continue
+            pid="$(cat "$f" 2>/dev/null || true)"
+            if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+                info "sudo: cancelling existing revert timer (root pid $pid)"
+                sudo kill "$pid" 2>/dev/null || true
+            fi
+            rm -f "$f"
+        done
+    else
+        local units
+        units=$(list_units)
+        if [[ -n "$units" ]]; then
+            info "sudo: stopping existing revert timer(s): $units"
+            # shellcheck disable=SC2086
+            sudo systemctl stop $units 2>/dev/null || true
+            # shellcheck disable=SC2086
+            sudo systemctl reset-failed $units 2>/dev/null || true
+        fi
+    fi
+}
+
+install_dropin() {
+    local tmp
+    tmp="$(mktemp)"
+    printf 'Defaults:%s timestamp_type=global\n' "$USER_NAME" >"$tmp"
+    info "sudo: validating sudoers fragment with visudo -cf"
+    sudo visudo -cf "$tmp" >/dev/null
+    info "sudo: installing drop-in to $SUDOERS_FILE"
+    sudo install -m 0440 -o root -g "$ROOT_GROUP" "$tmp" "$SUDOERS_FILE"
+    rm -f "$tmp"
+}
+
+schedule_revert() {
+    local duration="$1"
+    stop_existing
+    if [[ "$OS" == "Darwin" ]]; then
+        local secs pid unit
+        secs="$(parse_duration "$duration")"
+        mkdir -p "$REVERT_DIR"
+        # Detached ROOT process removes the drop-in after $secs. It reparents to
+        # launchd when this sudo call returns, so it survives our exit and needs
+        # no live sudo ticket to do the removal. (sleep pauses during system
+        # sleep, so the revert is a safety net, not a hard deadline.)
+        pid="$(sudo bash -c '( sleep '"$secs"' && rm -f "'"$SUDOERS_FILE"'" ) >/dev/null 2>&1 & echo $!')"
+        unit="revert-$(date +%s)-$pid"
+        echo "$pid" >"$REVERT_DIR/$unit"
+        info "sudo: scheduling revert in $duration (root pid $pid)"
+        printf '%s\n' "$unit"
+    else
+        command -v systemd-run >/dev/null || { echo "systemd-run not available; aborting." >&2; exit 1; }
+        local unit="${UNIT_PREFIX}-$(date +%s)-$$"
+        info "sudo: scheduling revert timer $unit.timer (fires in $duration)"
+        sudo systemd-run --on-active="$duration" --unit="$unit" \
+            /bin/rm -f "$SUDOERS_FILE" >/dev/null
+        printf '%s\n' "$unit"
+    fi
+}
+
+remove_dropin() {
+    stop_existing
+    info "sudo: removing drop-in $SUDOERS_FILE"
+    sudo rm -f "$SUDOERS_FILE"
+    info "sudo: invalidating cached ticket (sudo -k)"
+    sudo -k || true
+}
+
+cmd_status() {
+    if [[ -e "$SUDOERS_FILE" ]]; then
+        echo "drop-in: $SUDOERS_FILE (present)"
+    else
+        echo "drop-in: $SUDOERS_FILE (absent)"
+    fi
+    if [[ "$OS" == "Darwin" ]]; then
+        local any=0 f pid
+        if [[ -d "$REVERT_DIR" ]]; then
+            for f in "$REVERT_DIR"/*; do
+                [[ -e "$f" ]] || continue
+                pid="$(cat "$f" 2>/dev/null || true)"
+                if [[ -n "$pid" ]] && kill -0 "$pid" 2>/dev/null; then
+                    [[ $any -eq 0 ]] && echo "pending revert timers:"
+                    echo "  $(basename "$f") (root pid $pid, alive)"
+                    any=1
+                else
+                    rm -f "$f"
+                fi
+            done
+        fi
+        [[ $any -eq 0 ]] && echo "pending revert timers: none"
+    else
+        local units
+        units=$(list_units)
+        if [[ -n "$units" ]]; then
+            echo "pending revert timers:"
+            # shellcheck disable=SC2086
+            systemctl list-timers --all $units 2>/dev/null || true
+        else
+            echo "pending revert timers: none"
+        fi
+    fi
+}
+
+cmd_revoke() {
+    remove_dropin
+    echo "Revoked: $SUDOERS_FILE removed, timers cancelled, ticket invalidated."
+}
+
+cmd_enable() {
+    local duration="${1:-30min}"
+    install_dropin
+    local unit
+    unit=$(schedule_revert "$duration")
+    cat <<EOF
+Global sudo timestamp enabled for $USER_NAME; reverts in $duration.
+  drop-in : $SUDOERS_FILE
+  timer   : $unit
+Check:   claude-sudo status
+Revoke:  claude-sudo revoke
+EOF
+}
+
+# cmd_run state is held in script-globals so the EXIT trap can read them
+# after cmd_run returns (locals would be out of scope by then under set -u).
+RUN_INSTALLED_HERE=0
+RUN_KEEPALIVE_PID=
+RUN_MARKER_FILE=
+
+run_cleanup() {
+    [[ -n $RUN_KEEPALIVE_PID ]] && kill "$RUN_KEEPALIVE_PID" 2>/dev/null || true
+    [[ -n $RUN_MARKER_FILE ]] && rm -f "$RUN_MARKER_FILE"
+    rmdir "$MARKER_DIR" 2>/dev/null || true
+    if [[ $RUN_INSTALLED_HERE -eq 1 ]]; then
+        remove_dropin || true
+    fi
+}
+
+cmd_run() {
+    trap run_cleanup EXIT
+
+    # If a drop-in is already in place (e.g. from a prior `enable`), leave it
+    # and its timer alone on exit — the user installed it deliberately.
+    # Otherwise install one for this session, with a long-horizon revert timer
+    # as a safety net in case the EXIT trap doesn't fire (e.g. SIGKILL).
+    if [[ -e "$SUDOERS_FILE" ]]; then
+        info "sudo: drop-in already present, leaving in place on exit"
+    else
+        install_dropin
+        schedule_revert "8h" >/dev/null
+        RUN_INSTALLED_HERE=1
+    fi
+
+    # Drop a session marker (start time in epoch seconds) so the tmux statusline
+    # — via `claude-sudo indicator` — can show that this session is still open.
+    mkdir -p "$MARKER_DIR"
+    RUN_MARKER_FILE="$MARKER_DIR/$$"
+    date +%s >"$RUN_MARKER_FILE"
+
+    # Prime the (now-global) ticket so the first sudo from a tool call won't prompt.
+    sudo -v
+
+    # The global drop-in only widens *scope* (any tty/process sees the ticket);
+    # it does not extend timestamp_timeout (default ~5min). Without periodic
+    # refresh the cache expires mid-session and claude's tty-less Bash can't
+    # re-prompt — so keep it warm from this tty.
+    (
+        while true; do
+            sudo -nv 2>/dev/null || exit
+            sleep 240
+        done
+    ) &
+    RUN_KEEPALIVE_PID=$!
+
+    claude "$@"
+}
+
+cmd_indicator() {
+    # Emits a full status-bar separator block so the tmux config can drop its
+    # own `][` between this and the next section. When inactive, renders the
+    # plain green `][` separator. When active, splits into `] [SUDO Xm] [` so
+    # the SUDO label sits inside its own bracket.
+    local oldest now elapsed hours mins
+    if [[ -d $MARKER_DIR ]]; then
+        oldest=$(cat "$MARKER_DIR"/* 2>/dev/null | sort -n | head -n1)
+    fi
+    if [[ -z ${oldest:-} ]]; then
+        printf '#[fg=green]][#[default] '
+        return 0
+    fi
+    now=$(date +%s)
+    elapsed=$(( now - oldest ))
+    hours=$(( elapsed / 3600 ))
+    mins=$(( (elapsed % 3600) / 60 ))
+    if (( hours > 0 )); then
+        printf '#[fg=green]] #[fg=red,bold][SUDO %dh%02dm]#[default] #[fg=green][#[default] ' "$hours" "$mins"
+    else
+        printf '#[fg=green]] #[fg=red,bold][SUDO %dm]#[default] #[fg=green][#[default] ' "$mins"
+    fi
+}
+
+show_help() { sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; }
+
+case "${1:-}" in
+    enable)         shift; cmd_enable "$@" ;;
+    status)         cmd_status ;;
+    revoke)         cmd_revoke ;;
+    indicator)      cmd_indicator ;;
+    help|--help|-h) show_help ;;
+    run)            shift; cmd_run "$@" ;;
+    resume)         shift; cmd_run --resume "$@" ;;
+    *)              cmd_run "$@" ;;
+esac

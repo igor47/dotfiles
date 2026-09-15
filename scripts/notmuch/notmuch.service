@@ -1,0 +1,6 @@
+[Unit]
+Description=Updates notmuch index
+
+[Service]
+Type=oneshot
+ExecStart=/home/igor47/bin/notmuch-new.sh

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+TOKEN=$1
+shift
+
+if [[ -z $TOKEN ]]; then
+    echo "Missing token value..."
+    exit 1
+fi
+
+set -u
+
+mkdir -p `dirname ${AWS_SESSION_FILE}`
+unset AWS_SESSION_TOKEN
+
+AWS_ACCESS_KEY_ID=${MASTER_AWS_ACCESS_KEY_ID} AWS_SECRET_ACCESS_KEY=${MASTER_AWS_SECRET_ACCESS_KEY} aws sts get-session-token --serial-number $AWS_MFA_ARN --token-code ${TOKEN} > ~/.config/aws/session-${MASTER_AWS_ACCESS_KEY_ID} > ${AWS_SESSION_FILE}
+echo "saved session info to ${AWS_SESSION_FILE}"
