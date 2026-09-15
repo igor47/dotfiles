@@ -12,5 +12,5 @@ notmuch tag --batch << EOF
 EOF
 
 echo "reporting mail stats..."
-cd "/home/igor47/repos/mailograf"
-/home/igor47/.asdf/installs/python/3.8.9/bin/poetry run mailograf report
+# venv made with: python3.8 -m venv .venv && .venv/bin/pip install -e .
+"$HOME/repos/mailograf/.venv/bin/mailograf" report
