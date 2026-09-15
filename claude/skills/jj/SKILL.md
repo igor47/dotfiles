@@ -47,7 +47,9 @@ the help output and say so in your final message.
 1. Before editing any file, `jj st`. If `@` already holds work, or is a
    described change you were not asked to extend, run `jj new -m "<intent>"`
    first. Starting on top of existing content means splitting later, which
-   wastes time and tokens.
+   wastes time and tokens. If `@` is empty and undescribed it is yours: describe
+   it with `jj desc -m` rather than stacking a new change on it, which leaves
+   an empty commit behind.
 2. Describe first, refine at the end. The initial `-m` states intent; when the
    change is done, `jj desc -m` with the final message: an imperative subject
    line, then a body saying why.
