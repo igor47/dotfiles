@@ -4,6 +4,10 @@ a collection of my local scripts, part of the dotfiles repo. the ones meant
 to be on PATH are linked into `~/bin` by `mise run install` (see the manifest
 in `../tasks/install`).
 
+## fullcharge
+
+reminder for how to make my laptop charge to 100% (which it doesn't usually do).
+
 ## claude
 
 the `claude` on PATH (via `~/bin`). runs the real binary from `~/.local/bin`
