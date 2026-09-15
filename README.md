@@ -41,6 +41,13 @@ never writes back. keep machine-varying keys (model, theme, plugins) out of it.
 everything else under `~/.claude` (sessions, history, caches, memory) is
 machine state and stays out of the repo.
 
+## scripts
+
+`scripts/` is the former `igor47/scripts` repo, merged in with its history.
+the ones meant to be on PATH are linked into `~/bin` by the manifest; see
+[`scripts/README.md`](scripts/README.md) for what each does. `scripts/claude`
+is the `claude` command everywhere.
+
 ## machine-local overrides
 
 machine-specific settings go in a local file that the shared config sources,

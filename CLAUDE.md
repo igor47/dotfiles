@@ -21,6 +21,10 @@ Personal config files, symlinked into `$HOME` by `mise run install`.
   preferences belong in it; never `model`, `theme`, or `enabledPlugins`, since
   a value here overrides whatever `/model` or `/config` saved locally. Do not
   add anything else from `~/.claude` (sessions, history, caches, memory).
+- **`scripts/` holds executables linked into `~/bin`.** A new script needs a
+  `link scripts/<name> bin/<name>` manifest row and an entry in
+  `scripts/README.md`. `scripts/claude` is the only `claude` on PATH; changes
+  to how Claude Code is launched go there, not in `bashrc`.
 - **`ssh_config` is a seed, not a link.** The installed `~/.ssh/config` has
   machine-local additions; edits to the shared base go in the repo file and
   are applied by hand on each machine.

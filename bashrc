@@ -91,7 +91,7 @@ if [ -f ~/.bash_aliases ]; then
     . ~/.bash_aliases
 fi
 
-# rtssh moved to ~/repos/scripts/rtssh (symlinked into ~/bin) — it's now a
+# rtssh moved to ~/repos/dotfiles/scripts/rtssh (symlinked into ~/bin) — it's now a
 # retrying wrapper instead of a one-shot autossh call.
 
 # Some aliases we want everywhere

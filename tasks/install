@@ -25,6 +25,11 @@ link starship.toml        .config/starship.toml
 link bashrc               .bashrc
 link screenrc             .screenrc
 link claude/skills        .claude/skills
+link scripts/claude       bin/claude
+link scripts/claude-sudo  bin/claude-sudo
+link scripts/copy         bin/copy
+link scripts/paste        bin/paste
+link scripts/rtssh        bin/rtssh
 seed ssh_config           .ssh/config
 '
 

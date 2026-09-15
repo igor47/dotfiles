@@ -1,6 +1,8 @@
 # Scripts
 
-a collection of my local scripts.
+a collection of my local scripts, part of the dotfiles repo. the ones meant
+to be on PATH are linked into `~/bin` by `mise run install` (see the manifest
+in `../tasks/install`).
 
 ## aws_*
 
