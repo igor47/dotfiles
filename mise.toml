@@ -1,0 +1,3 @@
+# tasks live as executable scripts in tasks/; `mise tasks` lists them.
+[task_config]
+includes = ["tasks"]

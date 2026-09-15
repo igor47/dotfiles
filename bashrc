@@ -94,20 +94,6 @@ fi
 # rtssh moved to ~/repos/scripts/rtssh (symlinked into ~/bin) — it's now a
 # retrying wrapper instead of a one-shot autossh call.
 
-# claude code sets its process title to the version number, which node turns
-# into an OSC terminal-title escape; tmux (allow-rename on by default) then
-# renames the window to e.g. "2.1.202" in the window list. no claude-side knob
-# exists (anthropics/claude-code#49852, #7229), so wrap it: disable rename for
-# just this window, give it a meaningful name, restore on exit. the RETURN trap
-# fires even on ctrl-c / non-zero exit so we don't leave rename off.
-function claude {
-  if [ -n "$TMUX" ]; then
-    trap 'tmux setw allow-rename on \; setw automatic-rename on' RETURN
-    tmux setw allow-rename off \; rename-window "claude:${PWD##*/}"
-  fi
-  command claude "$@"
-}
-
 # Some aliases we want everywhere
 alias pj='python -mjson.tool'
 alias ll='ls -l'

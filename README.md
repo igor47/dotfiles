@@ -1,48 +1,54 @@
 dotfiles
 ========
 
-assorted dotfiles. symlink each into place — prefer the **XDG** location
-(`~/.config/...`) wherever the tool supports it; only a few tools that predate
-XDG are read from `$HOME`.
+assorted dotfiles, installed by symlinking each into place. XDG locations
+(`~/.config/...`) are preferred wherever the tool supports them; a few tools
+that predate XDG are read from `$HOME`.
 
-machine-specific settings go in a local override that the shared config sources,
-so the tracked files stay portable:
+## install
 
-- **git:** `~/.config/git/config.local` (e.g. per-machine `user.email`, signing key)
-- **shell:** `~/.bash_profile`
-
-## install locations
-
-| file                     | symlink to                        | notes |
-|--------------------------|-----------------------------------|-------|
-| `gitconfig`              | `~/.config/git/config`            | XDG   |
-| `gitignore_global`       | `~/.config/git/ignore`            | git's default global excludes (no `core.excludesfile` needed) |
-| `tmux.conf`              | `~/.config/tmux/tmux.conf`        | XDG; TPM auto-installs to `~/.config/tmux/plugins/` |
-| `jjconfig.toml`          | `~/.config/jj/config.toml`        | XDG   |
-| `alacritty.yml`          | `~/.config/alacritty/alacritty.yml` | XDG |
-| `kitty.conf`             | `~/.config/kitty/kitty.conf`      | XDG   |
-| `starship.toml`          | `~/.config/starship.toml`         | XDG; starship's default config path |
-| `bashrc`                 | `~/.bashrc`                       | bash: `$HOME` only |
-| `ssh_config`             | `~/.ssh/config`                   | ssh: `$HOME` only; base config, add hosts below `moomers` |
-| `screenrc`               | `~/.screenrc`                     | screen: `$HOME` only |
-
-quick-link the XDG ones:
+needs [mise](https://mise.jdx.dev). tasks are scripts in `tasks/`, wired up by
+`mise.toml`; `mise tasks` lists them.
 
 ```sh
 cd ~/repos/dotfiles
-while read -r src dst; do
-  mkdir -p ~/.config/"$(dirname "$dst")"
-  ln -sfn "$PWD/$src" ~/.config/"$dst"
-done <<'EOF'
-gitconfig              git/config
-gitignore_global       git/ignore
-tmux.conf              tmux/tmux.conf
-jjconfig.toml          jj/config.toml
-alacritty.yml          alacritty/alacritty.yml
-kitty.conf             kitty/kitty.conf
-starship.toml          starship.toml
-EOF
+mise run install --dry-run   # show every link that would be made, and anything in the way
+mise run install             # make them
 ```
+
+the list of what goes where is the manifest at the top of `tasks/install`.
+that file is the source of truth; add a row there when adding a config file.
+
+- **link** rows become symlinks into this repo. the script repoints stale
+  symlinks but never replaces a real file; those are reported as `SKIP`.
+  `mise run install --force` moves such a file to `<file>.bak` and links over it.
+- **seed** rows (just `ssh_config`) are copied into place once if absent, and
+  are then yours to edit locally. the copy is never touched again.
+
+## claude code
+
+`claude/skills/` is linked as a whole directory to `~/.claude/skills`, so a
+skill added here shows up on every machine after a pull. skills are
+`claude/skills/<name>/SKILL.md`.
+
+`claude/settings.json` holds portable preferences (editor mode, permission
+mode, effort). it is *not* linked into `~/.claude`: claude code writes its own
+`~/.claude/settings.json` (`/config`, `/model`, plugin installs), so linking
+would churn the repo. instead the `claude` wrapper script in `~/bin` passes it
+with `--settings`, which layers it above the local file for that session and
+never writes back. keep machine-varying keys (model, theme, plugins) out of it.
+
+everything else under `~/.claude` (sessions, history, caches, memory) is
+machine state and stays out of the repo.
+
+## machine-local overrides
+
+machine-specific settings go in a local file that the shared config sources,
+so the tracked files stay portable:
+
+- **git:** `~/.config/git/config.local` (per-machine `user.email`, signing key)
+- **shell:** `~/.bash_profile`
+- **ssh:** `~/.ssh/config` itself, since it is a seeded copy rather than a link
 
 ## Lock.app (macOS)
 

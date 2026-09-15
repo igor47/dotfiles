@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+#MISE description="Symlink dotfiles into $HOME. Idempotent; safe to re-run."
+#USAGE flag "-n --dry-run" help="Print what would change without touching anything"
+#USAGE flag "-f --force" help="Move a real file that is in the way to <file>.bak, then link"
+set -euo pipefail
+
+repo="${MISE_PROJECT_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
+dry="${usage_dry_run:-false}"
+force="${usage_force:-false}"
+
+# manifest: <mode> <path in repo> <path relative to $HOME>
+#   link  $HOME/<dst> becomes a symlink to <repo>/<src>. Stale symlinks are
+#         repointed. A real file or directory is never replaced (reported as
+#         SKIP) unless --force, which moves it to <dst>.bak first.
+#   seed  <src> is copied to <dst> only when <dst> is absent. The copy is yours
+#         to edit locally afterwards and is never touched again.
+manifest='
+link gitconfig            .config/git/config
+link gitignore_global     .config/git/ignore
+link tmux.conf            .config/tmux/tmux.conf
+link jjconfig.toml        .config/jj/config.toml
+link alacritty.yml        .config/alacritty/alacritty.yml
+link kitty.conf           .config/kitty/kitty.conf
+link starship.toml        .config/starship.toml
+link bashrc               .bashrc
+link screenrc             .screenrc
+link claude/skills        .claude/skills
+seed ssh_config           .ssh/config
+'
+
+say() { printf '%-7s %s\n' "$1" "$2"; }
+run() { [ "$dry" = true ] || "$@"; }
+
+ensure_parent() {
+  local parent; parent="$(dirname "$1")"
+  [ -d "$parent" ] && return 0
+  say mkdir "$(dirname "$2")/"
+  run mkdir -p "$parent"
+  [ "$parent" = "$HOME/.ssh" ] && run chmod 700 "$parent"
+  return 0
+}
+
+status=0
+while read -r mode src dst; do
+  [ -n "$mode" ] || continue
+  from="$repo/$src" to="$HOME/$dst"
+  if [ ! -e "$from" ]; then
+    say MISSING "$src is not in the repo"; status=1; continue
+  fi
+  case "$mode" in
+    link)
+      if [ -L "$to" ]; then
+        if [ "$(readlink "$to")" = "$from" ]; then
+          say ok "$dst"
+        else
+          say relink "$dst -> $src  (was $(readlink "$to"))"
+          run ln -sfn "$from" "$to"
+        fi
+      elif [ -e "$to" ]; then
+        if [ "$force" != true ]; then
+          say SKIP "$dst is a real file; rerun with --force to move it to $dst.bak"; status=1
+        elif [ -e "$to.bak" ] || [ -L "$to.bak" ]; then
+          say SKIP "$dst is a real file and $dst.bak already exists; clean up by hand"; status=1
+        else
+          say backup "$dst -> $dst.bak"
+          run mv "$to" "$to.bak"
+          say link "$dst -> $src"
+          run ln -s "$from" "$to"
+        fi
+      else
+        ensure_parent "$to" "$dst"
+        say link "$dst -> $src"
+        run ln -s "$from" "$to"
+      fi
+      ;;
+    seed)
+      if [ -e "$to" ] || [ -L "$to" ]; then
+        say ok "$dst  (local copy, left alone)"
+      else
+        ensure_parent "$to" "$dst"
+        say seed "$dst <- $src"
+        run cp "$from" "$to"
+      fi
+      ;;
+    *)
+      say '??' "unknown mode '$mode' for $src"; status=1
+      ;;
+  esac
+done <<<"$manifest"
+
+[ "$dry" = true ] && echo "(dry run: nothing was changed)"
+exit $status
