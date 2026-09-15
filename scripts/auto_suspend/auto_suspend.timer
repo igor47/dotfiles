@@ -1,9 +1,0 @@
-[Unit]
-Description=Check battery level and auto-suspend
-
-[Timer]
-OnBootSec=1m
-OnUnitActiveSec=1m
-
-[Install]
-WantedBy=timers.target

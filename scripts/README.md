@@ -13,11 +13,6 @@ see [the blog post](https://igor.moomers.org/aws-mfa-cli-direnv).
 
 reminder for how to make my laptop charge to 100% (which it doesn't usually do).
 
-## auto_suspend
-
-determines when to suspend my laptop depending on state of charge.
-see the [relevant blog post](https://igor.moomers.org/arch-linux-config)
-
 ## notmuch
 
 regularly re-run the notmuch index, including tagging spam messages
