@@ -1,9 +1,0 @@
-[Unit]
-Description=Periodically updates notmuch index
-
-[Timer]
-OnStartupSec=1
-OnUnitActiveSec=1m
-
-[Install]
-WantedBy=timers.target
