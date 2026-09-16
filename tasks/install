@@ -17,6 +17,10 @@ force="${usage_force:-false}"
 #   link  $HOME/<dst> becomes a symlink to <repo>/<src>. Stale symlinks are
 #         repointed. A real file or directory is never replaced (reported as
 #         SKIP) unless --force, which moves it to <dst>.bak first.
+#   each  <src> is a directory whose children are linked one by one, so
+#         $HOME/<dst> stays a real directory that can also hold entries this
+#         repo knows nothing about. Links into <src> whose target is gone are
+#         pruned; anything else in <dst> is left alone.
 #   seed  <src> is copied to <dst> only when <dst> is absent. The copy is yours
 #         to edit locally afterwards and is never touched again.
 manifest='
@@ -29,7 +33,7 @@ link kitty.conf           .config/kitty/kitty.conf
 link starship.toml        .config/starship.toml
 link bashrc               .bashrc
 link screenrc             .screenrc
-link claude/skills        .claude/skills
+each claude/skills        .claude/skills
 link scripts/claude       bin/claude
 link scripts/claude-sudo  bin/claude-sudo
 link scripts/copy         bin/copy
@@ -50,6 +54,34 @@ ensure_parent() {
   return 0
 }
 
+# link_one <source path> <link path> <label for output>; sets $status on SKIP.
+link_one() {
+  local from="$1" to="$2" dst="$3" src="${1#$repo/}"
+  if [ -L "$to" ]; then
+    if [ "$(readlink -f "$to")" = "$(readlink -f "$from")" ]; then
+      say ok "$dst"
+    else
+      say relink "$dst -> $src  (was $(readlink "$to"))"
+      run ln -sfn "$from" "$to"
+    fi
+  elif [ -e "$to" ]; then
+    if [ "$force" != true ]; then
+      say SKIP "$dst is a real file; rerun with --force to move it to $dst.bak"; status=1
+    elif [ -e "$to.bak" ] || [ -L "$to.bak" ]; then
+      say SKIP "$dst is a real file and $dst.bak already exists; clean up by hand"; status=1
+    else
+      say backup "$dst -> $dst.bak"
+      run mv "$to" "$to.bak"
+      say link "$dst -> $src"
+      run ln -s "$from" "$to"
+    fi
+  else
+    ensure_parent "$to" "$dst"
+    say link "$dst -> $src"
+    run ln -s "$from" "$to"
+  fi
+}
+
 status=0
 while read -r mode src dst; do
   [ -n "$mode" ] || continue
@@ -59,29 +91,49 @@ while read -r mode src dst; do
   fi
   case "$mode" in
     link)
+      link_one "$from" "$to" "$dst"
+      ;;
+    each)
+      # An earlier install may have linked the whole directory; replace that
+      # link with a real directory so machine-local entries can live beside
+      # the tracked ones.
       if [ -L "$to" ]; then
         if [ "$(readlink -f "$to")" = "$(readlink -f "$from")" ]; then
-          say ok "$dst"
+          say unlink "$dst  (was one link to $src; becoming a real directory)"
+          if [ "$dry" = true ]; then
+            say '' "  rerun the dry run afterwards to see the per-entry links"
+            continue
+          fi
+          rm "$to"
         else
-          say relink "$dst -> $src  (was $(readlink "$to"))"
-          run ln -sfn "$from" "$to"
+          say SKIP "$dst is a symlink to $(readlink "$to"); move it aside by hand"; status=1; continue
         fi
-      elif [ -e "$to" ]; then
-        if [ "$force" != true ]; then
-          say SKIP "$dst is a real file; rerun with --force to move it to $dst.bak"; status=1
-        elif [ -e "$to.bak" ] || [ -L "$to.bak" ]; then
-          say SKIP "$dst is a real file and $dst.bak already exists; clean up by hand"; status=1
-        else
-          say backup "$dst -> $dst.bak"
-          run mv "$to" "$to.bak"
-          say link "$dst -> $src"
-          run ln -s "$from" "$to"
-        fi
-      else
-        ensure_parent "$to" "$dst"
-        say link "$dst -> $src"
-        run ln -s "$from" "$to"
+      elif [ -e "$to" ] && [ ! -d "$to" ]; then
+        say SKIP "$dst is a real file, not a directory; clean up by hand"; status=1; continue
       fi
+      if [ ! -d "$to" ]; then
+        ensure_parent "$to" "$dst"
+        say mkdir "$dst/"
+        run mkdir -p "$to"
+      fi
+      for child in "$from"/*; do
+        [ -e "$child" ] || continue
+        link_one "$child" "$to/$(basename "$child")" "$dst/$(basename "$child")"
+      done
+      # A link into <src> with nothing behind it is a skill this repo renamed
+      # or deleted; drop it. Real files and links elsewhere are left alone.
+      for child in "$to"/*; do
+        [ -L "$child" ] || continue
+        [ -e "$child" ] && continue
+        # compared unresolved: on macOS `readlink -f` gives up on a link
+        # whose target is missing, which is exactly the case being pruned.
+        case "$(readlink "$child")" in
+          "$from"/*)
+            say prune "$dst/$(basename "$child")  (target no longer in the repo)"
+            run rm "$child"
+            ;;
+        esac
+      done
       ;;
     seed)
       if [ -e "$to" ] || [ -L "$to" ]; then

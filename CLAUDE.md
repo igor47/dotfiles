@@ -14,8 +14,10 @@ Personal config files, symlinked into `$HOME` by `mise run install`.
 - **New automation is a new script in `tasks/`**, executable, with `#MISE` and
   `#USAGE` headers so `mise tasks` documents it and flags land as `usage_<flag>`
   env vars. Do not add a Makefile or standalone shell scripts at the root.
-- **`claude/skills/` is linked as a whole directory** into `~/.claude/skills`.
-  Put new skills at `claude/skills/<name>/SKILL.md`.
+- **`claude/skills/` is linked skill by skill** into `~/.claude/skills`, which
+  is a real directory that may also hold machine-local skills. Put new shared
+  skills at `claude/skills/<name>/SKILL.md`; the install task links each one
+  and never touches an entry that is not a link into this repo.
 - **`claude/settings.json` is loaded with `--settings`, never symlinked.** The
   `claude` wrapper in `~/bin` passes it on every launch. Only portable
   preferences belong in it; never `model`, `theme`, or `enabledPlugins`, since

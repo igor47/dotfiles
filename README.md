@@ -22,14 +22,19 @@ that file is the source of truth; add a row there when adding a config file.
 - **link** rows become symlinks into this repo. the script repoints stale
   symlinks but never replaces a real file; those are reported as `SKIP`.
   `mise run install --force` moves such a file to `<file>.bak` and links over it.
+- **each** rows point at a directory and link its children one at a time, so
+  the directory in `$HOME` stays real and can hold machine-local entries
+  beside the tracked ones. a link into the repo whose target has gone (a
+  renamed or deleted entry) is pruned; anything else in there is left alone.
 - **seed** rows (just `ssh_config`) are copied into place once if absent, and
   are then yours to edit locally. the copy is never touched again.
 
 ## claude code
 
-`claude/skills/` is linked as a whole directory to `~/.claude/skills`, so a
-skill added here shows up on every machine after a pull. skills are
-`claude/skills/<name>/SKILL.md`.
+`claude/skills/` is an **each** row: every `claude/skills/<name>/` is linked
+individually into `~/.claude/skills/`, so a skill added here shows up on every
+machine after a pull, and a machine can still keep its own unshared skills in
+the same directory. skills are `claude/skills/<name>/SKILL.md`.
 
 `claude/settings.json` holds portable preferences (editor mode, permission
 mode, effort). it is *not* linked into `~/.claude`: claude code writes its own
